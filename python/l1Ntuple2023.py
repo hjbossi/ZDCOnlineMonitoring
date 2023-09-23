@@ -1,0 +1,217 @@
+# L1Ntuple for ZDC studies with 2023 data
+# Hannah Bossi, <hannah.bossi@cern.ch>
+# 9/17/2023
+import FWCore.ParameterSet.Config as cms
+
+
+from Configuration.Eras.Era_Run3_pp_on_PbPb_cff import Run3_pp_on_PbPb
+process = cms.Process('RAW2DIGI', Run3_pp_on_PbPb)
+
+# import of standard configurations
+process.load('Configuration.StandardSequences.Services_cff')
+process.load('SimGeneral.HepPDTESSource.pythiapdt_cfi')
+process.load('FWCore.MessageService.MessageLogger_cfi')
+process.load('Configuration.EventContent.EventContent_cff')
+process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
+process.load('Configuration.StandardSequences.MagneticField_cff')
+process.load('Configuration.StandardSequences.RawToDigi_DataMapper_cff')
+process.load('Configuration.StandardSequences.EndOfProcess_cff')
+process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
+
+
+GT        = "132X_dataRun3_HLT_v2"
+process.GlobalTag.globaltag = GT
+
+
+# ==================================================================
+# ==================== modification needed for 2023 data ===========
+from CondCore.CondDB.CondDB_cfi import *
+process.es_pool = cms.ESSource("PoolDBESSource",
+    timetype = cms.string('runnumber'),
+    toGet = cms.VPSet(
+        cms.PSet(
+            record = cms.string("HcalElectronicsMapRcd"),
+            tag = cms.string("HcalElectronicsMap_2021_v2.0_data")
+        )
+    ),
+    connect = cms.string('frontier://FrontierProd/CMS_CONDITIONS'),
+        authenticationMethod = cms.untracked.uint32(1)
+    )
+
+process.es_prefer = cms.ESPrefer('HcalTextCalibrations', 'es_ascii')
+process.es_ascii = cms.ESSource(
+    'HcalTextCalibrations',
+    input = cms.VPSet(
+        cms.PSet(
+
+            object = cms.string('ElectronicsMap'),
+            file = cms.FileInPath("emap_2023_newZDC.txt")
+
+             )
+        )
+    )
+# =======================================================================
+
+process.maxEvents = cms.untracked.PSet(
+    input = cms.untracked.int32(-1),
+    output = cms.optional.untracked.allowed(cms.int32,cms.PSet)
+)
+
+# Input source
+
+# in case of dat files - read it like this
+
+
+process.source = cms.Source("NewEventStreamFileReader",
+    fileNames = cms.untracked.vstring('file:/eos/cms/store/t0streamer/Data/PhysicsHIPhysicsRawPrime0/000/373/871/run373871_ls0005_streamPhysicsHIPhysicsRawPrime0_StorageManager.dat')
+)
+
+
+# Run- 373425: 'file:/eos/cms/tier0/store/data/Run2023F/ZeroBias/RAW/v1/000/373/425/00000/ded8ed4b-893c-4bb4-8ef7-f2930efc42d3.root'
+# Run 373561: 'file:/eos/cms/tier0/store/data/Run2023F/MinimumBias/RAW/v1/000/373/561/00000/f1d5c81c-c49a-4a39-8cc1-4d8d1614ea2f.root'
+# Run 373559: 'file:/eos/cms/tier0/store/data/Run2023F/MinimumBias/RAW/v1/000/373/559/00000/788d8094-a2b7-4e37-9b45-2f0737dc3e1f.root'
+# Run 373273: '/store/data/Run2023F/PPRefZeroBias0/RAW/v1/000/373/273/00000/07524cfb-c470-4e7f-a207-0a0ebd54a0a1.root'
+
+'''
+process.source = cms.Source("PoolSource",
+    fileNames = cms.untracked.vstring(
+        'file:/eos/cms/tier0/store/data/Run2023F/ZeroBias/RAW/v1/000/373/710/00000/c881defd-57ba-4f3e-8c95-8a8427a1dd9b.root'
+    )
+)
+'''
+
+
+
+process.options = cms.untracked.PSet(
+    FailPath = cms.untracked.vstring(),
+    IgnoreCompletely = cms.untracked.vstring(),
+    Rethrow = cms.untracked.vstring(),
+    SkipEvent = cms.untracked.vstring(),
+    accelerators = cms.untracked.vstring('*'),
+    allowUnscheduled = cms.obsolete.untracked.bool,
+    canDeleteEarly = cms.untracked.vstring(),
+    deleteNonConsumedUnscheduledModules = cms.untracked.bool(True),
+    dumpOptions = cms.untracked.bool(False),
+    emptyRunLumiMode = cms.obsolete.untracked.string,
+    eventSetup = cms.untracked.PSet(
+        forceNumberOfConcurrentIOVs = cms.untracked.PSet(
+            allowAnyLabel_=cms.required.untracked.uint32
+        ),
+        numberOfConcurrentIOVs = cms.untracked.uint32(0)
+    ),
+    fileMode = cms.untracked.string('FULLMERGE'),
+    forceEventSetupCacheClearOnNewRun = cms.untracked.bool(False),
+    holdsReferencesToDeleteEarly = cms.untracked.VPSet(),
+    makeTriggerResults = cms.obsolete.untracked.bool,
+    modulesToIgnoreForDeleteEarly = cms.untracked.vstring(),
+    numberOfConcurrentLuminosityBlocks = cms.untracked.uint32(0),
+    numberOfConcurrentRuns = cms.untracked.uint32(1),
+    numberOfStreams = cms.untracked.uint32(0),
+    numberOfThreads = cms.untracked.uint32(1),
+    printDependencies = cms.untracked.bool(False),
+    sizeOfStackForThreadsInKB = cms.optional.untracked.uint32,
+    throwIfIllegalParameter = cms.untracked.bool(True),
+    wantSummary = cms.untracked.bool(True)
+)
+
+# Production Info
+process.configurationMetadata = cms.untracked.PSet(
+    annotation = cms.untracked.string('l1Ntuple nevts:100'),
+    name = cms.untracked.string('Applications'),
+    version = cms.untracked.string('$Revision: 1.19 $')
+)
+
+# Output definition
+from Configuration.Applications.ConfigBuilder import MassReplaceInputTag
+
+# Additional output definition
+
+# Path and EndPath definitions
+process.raw2digi_step = cms.Path(process.RawToDigi)
+process.endjob_step = cms.EndPath(process.endOfProcess)
+
+# Schedule definition
+process.schedule = cms.Schedule(process.raw2digi_step, process.endjob_step)
+
+
+from PhysicsTools.PatAlgos.tools.helpers import associatePatAlgosToolsTask
+associatePatAlgosToolsTask(process)
+
+# customisation of the process.
+
+# Automatic addition of the customisation function from L1Trigger.Configuration.customiseReEmul
+from L1Trigger.Configuration.customiseReEmul import L1TReEmulFromRAW 
+
+#call to customisation function L1TReEmulFromRAW imported from L1Trigger.Configuration.customiseReEmul
+process = L1TReEmulFromRAW(process)
+
+# Automatic addition of the customisation function from L1Trigger.L1TNtuples.customiseL1Ntuple
+from L1Trigger.L1TNtuples.customiseL1Ntuple import L1NtupleRAWEMU 
+
+#call to customisation function L1NtupleRAWEMU imported from L1Trigger.L1TNtuples.customiseL1Ntuple
+process = L1NtupleRAWEMU(process)
+
+# Automatic addition of the customisation function from L1Trigger.Configuration.customiseSettings
+from L1Trigger.Configuration.customiseSettings import L1TSettingsToCaloParams_2018_v1_4_1 
+
+#call to customisation function L1TSettingsToCaloParams_2018_v1_4_1 imported from L1Trigger.Configuration.customiseSettings
+process = L1TSettingsToCaloParams_2018_v1_4_1(process)
+
+# Automatic addition of the customisation function from L1Trigger.Configuration.customiseUtils
+from L1Trigger.Configuration.customiseUtils import L1TGlobalMenuXML 
+
+#call to customisation function L1TGlobalMenuXML imported from L1Trigger.Configuration.customiseUtils
+process = L1TGlobalMenuXML(process)
+
+# End of customisation functions
+
+
+# Customisation from command line
+
+# Add early deletion of temporary data products to reduce peak memory need
+from Configuration.StandardSequences.earlyDeleteSettings_cff import customiseEarlyDelete
+process = customiseEarlyDelete(process)
+# End adding early deletion
+
+
+
+# =====================================================================
+# add in the zdc analyzer - this writes the digi information to a tree
+process.load('HeavyIonsAnalysis.ZDCAnalysis.QWZDC2018Producer_cfi')
+process.load('HeavyIonsAnalysis.ZDCAnalysis.QWZDC2018RecHit_cfi')
+process.load('HeavyIonsAnalysis.ZDCAnalysis.zdcanalyzer_cfi')
+
+process.zdcanalyzer.doZDCRecHit = False
+process.zdcanalyzer.doZDCDigi = True
+process.zdcanalyzer.zdcRecHitSrc = cms.InputTag("QWzdcreco")
+process.zdcanalyzer.zdcDigiSrc = cms.InputTag("hcalDigis", "ZDC")
+process.zdcanalyzer.calZDCDigi = False
+process.zdcanalyzer.verbose = False
+process.zdcanalyzer_step = cms.Path(process.zdcanalyzer)
+process.schedule.append(process.zdcanalyzer_step)
+#=======================================================================
+
+
+# ======================================================================
+# ======================== add in the emulator =========================
+# unpacked etsums
+process.l1UpgradeTree.sumZDCTag = cms.untracked.InputTag("gtStage2Digis","EtSumZDC") 
+process.l1UpgradeTree.sumZDCToken = cms.untracked.InputTag("gtStage2Digis","EtSumZDC")
+
+# l1 emulator sums
+process.l1UpgradeEmuTree.sumZDCTag = cms.untracked.InputTag("etSumZdcProducer")
+process.l1UpgradeEmuTree.sumZDCToken = cms.untracked.InputTag("etSumZdcProducer")
+
+process.etSumZdcProducer = cms.EDProducer('L1TZDCProducer',
+                                          zdcDigis = cms.InputTag("hcalDigis", "ZDC"),
+                                          sampleToCenterBX = cms.int32(2),
+                                          bxFirst = cms.int32(-2),
+                                          bxLast = cms.int32(2)
+)
+
+process.etSumZdc = cms.Path(process.etSumZdcProducer)
+process.schedule.append(process.etSumZdc)
+#======================================================================
+
+
+MassReplaceInputTag(process, new="rawPrimeDataRepacker", old="rawDataCollector")
