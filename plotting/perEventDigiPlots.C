@@ -1,7 +1,7 @@
 /*
- * validateZDCEmulation.C: Macro to validate the L1 ZDC emluated information using the ZDC digi output. 
+ * validateZDCEmulation.C: Macro to create summary plots of the ZDC digi distributions 
  * Input: Folder of L1Ntuples
- * Output: Set of summary statistics that validates the L1 ZDC emluated information.
+ * Output: Set of plots of per channel and total ZDC digi distributions
  * Authors: Hannah Bossi <hannah.bossi@cern.ch>, Gian Michele Innocenti, <gian.michele.innocenti@cern.ch> 
  * 8/20/23
 */
@@ -59,15 +59,11 @@ void FillChain(TChain &chain, vector<string> &files) {
   }
 }
 
-// ------ trigger type --------
-// 0 - no trigger
-// 1 - ZDC OR
-// 2 - ZDC And
-// ----------------------------
 
+// input is a folder of L1Ntuples
 int perEventDigiPlots(
     char const *input =
-        "/Users/hannahbossi/Documents/LocalCode/RunPrep/outputFiles/Run373784/") {
+        "/Users/hannahbossi/Documents/LocalCode/RunPrep/outputFiles/Run373985/") {
   /* read in all files in the input folder */
   vector<string> files;
   GetFiles(input, files);
@@ -80,12 +76,12 @@ int perEventDigiPlots(
   TTreeReaderArray<int> z_side(offReaderZDCDigi, "zside");
   TTreeReaderArray<int> sec(offReaderZDCDigi, "section");
   TTreeReaderArray<int> ch(offReaderZDCDigi, "channel"); 
-  TTreeReaderArray<int> adc(offReaderZDCDigi, "adcTs3");
+  TTreeReaderArray<int> adc(offReaderZDCDigi, "adcTs3"); // will maybe want to change the time slice depending on which is of interest
   TTreeReaderValue<int> N(offReaderZDCDigi, "n");
 
-  /* create histograms for efficiency plots */
   Long64_t totalEvents = offReaderZDCDigi.GetEntries(true);
 
+  /* create histograms */
   const Int_t nChannels = 18;
   TH1D* zdcChannel_h[nChannels];
     std::stringstream ss;
@@ -102,6 +98,7 @@ int perEventDigiPlots(
   for (Long64_t i = 0; i < totalEvents; i++) {
     offReaderZDCDigi.Next();
     for (int j = 0; j < *N; j++) {
+      // remove non-zdc channels
       if (z_side[j] != -1 && z_side[j] != 1)
         continue;
       if (sec[j] != 1 && sec[j] != 2)
@@ -111,12 +108,14 @@ int perEventDigiPlots(
       if (sec[j] == 2 && (ch[j] < 1 || ch[j] > 4))
         continue;
       int idet = (z_side[j] == 1 ? 9 : 0) + (sec[j] == 2 ? 5 : 0) + (ch[j] - 1);
+      // fill histograms
       zdcChannel_h[idet]->Fill(adc[idet]);
-       zdcTotalDigis->Fill(adc[idet]);
+      zdcTotalDigis->Fill(adc[idet]);
     }
 
 
   }
+  // loop over the channels and plot the histograms
   for(int i = 0; i < nChannels; ++i){
     TCanvas *c1 = new TCanvas("c1", "c1", 800, 600);
     c1->cd();
@@ -127,7 +126,7 @@ int perEventDigiPlots(
     zdcChannel_h[i]->SetLineWidth(2);
     zdcChannel_h[i]->SetTitle(Form("ZDC Channel %d", i)); 
     zdcChannel_h[i]->Draw();
-    ss << "../plots/zdc373784/zdcChannel_" << i << ".png";
+    ss << "../plots/zdc373985/zdcChannel_" << i << ".png";
     c1->SaveAs(ss.str().c_str());
     ss.str("");
   }
@@ -140,7 +139,7 @@ int perEventDigiPlots(
     zdcTotalDigis->SetTitle("ZDC Total Digis");
     zdcTotalDigis->SetLineWidth(2);
     zdcTotalDigis->Draw();
-    c2->SaveAs("../plots/zdc373784/zdcTotalDigis.png");
+    c2->SaveAs("../plots/zdc373985/zdcTotalDigis.png");
   return 1;
 }
 
