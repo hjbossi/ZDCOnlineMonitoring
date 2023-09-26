@@ -2,7 +2,8 @@
 # Hannah Bossi, <hannah.bossi@cern.ch>
 # 9/17/2023
 import FWCore.ParameterSet.Config as cms
-
+import os
+import sys
 
 from Configuration.Eras.Era_Run3_pp_on_PbPb_cff import Run3_pp_on_PbPb
 process = cms.Process('RAW2DIGI', Run3_pp_on_PbPb)
@@ -14,7 +15,7 @@ process.load('FWCore.MessageService.MessageLogger_cfi')
 process.load('Configuration.EventContent.EventContent_cff')
 process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
 process.load('Configuration.StandardSequences.MagneticField_cff')
-process.load('Configuration.StandardSequences.RawToDigi_DataMapper_cff')
+process.load('Configuration.StandardSequences.RawToDigi_Data_cff') # mapper for raw prime
 process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
@@ -45,32 +46,34 @@ process.es_ascii = cms.ESSource(
         cms.PSet(
 
             object = cms.string('ElectronicsMap'),
-            file = cms.FileInPath("emap_2023_newZDC.txt")
+            file = cms.FileInPath("emap_2023_newZDC_v2.txt")
 
              )
         )
     )
 # =======================================================================
 
+# To change the number of events, change this part
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(-1),
+    input = cms.untracked.int32(10000),
     output = cms.optional.untracked.allowed(cms.int32,cms.PSet)
 )
 
 # Input source
 
 # in case of dat files - read it like this
+filedir = '/eos/cms/store/t0streamer/Data/PhysicsHIPhysicsRawPrime14/000/374/200'
+print(filedir)
+infile    = cms.untracked.vstring()
+for f in reversed(os.listdir(filedir)):
+    if f[-4:] == '.dat' :
+        infile.append('file:'+filedir+'/'+f)
+print(infile)
 
 
 process.source = cms.Source("NewEventStreamFileReader",
-    fileNames = cms.untracked.vstring('file:/eos/cms/store/t0streamer/Data/PhysicsHIPhysicsRawPrime0/000/373/871/run373871_ls0005_streamPhysicsHIPhysicsRawPrime0_StorageManager.dat')
+                            fileNames = infile,
 )
-
-
-# Run- 373425: 'file:/eos/cms/tier0/store/data/Run2023F/ZeroBias/RAW/v1/000/373/425/00000/ded8ed4b-893c-4bb4-8ef7-f2930efc42d3.root'
-# Run 373561: 'file:/eos/cms/tier0/store/data/Run2023F/MinimumBias/RAW/v1/000/373/561/00000/f1d5c81c-c49a-4a39-8cc1-4d8d1614ea2f.root'
-# Run 373559: 'file:/eos/cms/tier0/store/data/Run2023F/MinimumBias/RAW/v1/000/373/559/00000/788d8094-a2b7-4e37-9b45-2f0737dc3e1f.root'
-# Run 373273: '/store/data/Run2023F/PPRefZeroBias0/RAW/v1/000/373/273/00000/07524cfb-c470-4e7f-a207-0a0ebd54a0a1.root'
 
 '''
 process.source = cms.Source("PoolSource",
@@ -111,7 +114,7 @@ process.options = cms.untracked.PSet(
     printDependencies = cms.untracked.bool(False),
     sizeOfStackForThreadsInKB = cms.optional.untracked.uint32,
     throwIfIllegalParameter = cms.untracked.bool(True),
-    wantSummary = cms.untracked.bool(True)
+    wantSummary = cms.untracked.bool(False)
 )
 
 # Production Info
@@ -202,11 +205,12 @@ process.l1UpgradeTree.sumZDCToken = cms.untracked.InputTag("gtStage2Digis","EtSu
 process.l1UpgradeEmuTree.sumZDCTag = cms.untracked.InputTag("etSumZdcProducer")
 process.l1UpgradeEmuTree.sumZDCToken = cms.untracked.InputTag("etSumZdcProducer")
 
+# do not change these settings
 process.etSumZdcProducer = cms.EDProducer('L1TZDCProducer',
                                           zdcDigis = cms.InputTag("hcalDigis", "ZDC"),
                                           sampleToCenterBX = cms.int32(2),
                                           bxFirst = cms.int32(-2),
-                                          bxLast = cms.int32(2)
+                                          bxLast = cms.int32(3)
 )
 
 process.etSumZdc = cms.Path(process.etSumZdcProducer)
@@ -214,4 +218,8 @@ process.schedule.append(process.etSumZdc)
 #======================================================================
 
 
+# input tag replacement needed for raw prime data
 MassReplaceInputTag(process, new="rawPrimeDataRepacker", old="rawDataCollector")
+
+#input tag needed for regular HI data
+#MassReplaceInputTag(process, new="rawDataRepacker", old="rawDataCollector")
