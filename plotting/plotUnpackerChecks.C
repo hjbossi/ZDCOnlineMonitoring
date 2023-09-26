@@ -3,11 +3,11 @@
 * Hannah Bossi, <hannah.bossi@cern.ch>, 9/24/2023
 */
 
-void plotUnpackerChecks(){
+void plotUnpackerChecks(int runNumber = 374200){
     gStyle->SetOptStat(0);
 
     // histogram 1: sum minus vs. global bx
-    TFile* inFile = new TFile("/Users/hannahbossi/Documents/LocalCode/RunPrep/outputFiles/unpackerTest_Run374106_FullSample.root");
+    TFile* inFile = new TFile(Form("/Users/hannahbossi/Documents/LocalCode/RunPrep/outputFiles/unpackerTest_Run%d.root", runNumber));
     TH1D* sumMinusBx = (TH1D*)inFile->Get("sumMinusBx");
     sumMinusBx->SetLineColor(kRed);
     sumMinusBx->SetMarkerColor(kRed);
@@ -31,7 +31,7 @@ void plotUnpackerChecks(){
     sumMinusBx->Draw();
     sumMinusEmuBx->Draw("same");
     leg->Draw("same"); 
-    c1->SaveAs("/Users/hannahbossi/Documents/LocalCode/RunPrep/plots/UnpackerChecks/sumMinus_GlobalBx.png");
+    c1->SaveAs(Form("/Users/hannahbossi/Documents/LocalCode/RunPrep/plots/UnpackerChecks/Run%d/sumMinus_GlobalBx.png", runNumber));
 
 
     // histogram 2: sum plus vs. global bx
@@ -58,7 +58,7 @@ void plotUnpackerChecks(){
     sumPlusBx->Draw();
     sumPlusEmuBx->Draw("same");
     leg2->Draw("same");
-    c2->SaveAs("/Users/hannahbossi/Documents/LocalCode/RunPrep/plots/UnpackerChecks/sumPlus_GlobalBx.png");
+    c2->SaveAs(Form("/Users/hannahbossi/Documents/LocalCode/RunPrep/plots/UnpackerChecks/Run%d/sumPlus_GlobalBx.png", runNumber));
 
   
     //histogram 3: sum minus correlation plots
@@ -85,7 +85,7 @@ void plotUnpackerChecks(){
     leg3->AddEntry((TObject*)0, Form("RMS Unpack: %.4f", corrMinus->GetRMS(2)), "");
     leg3->Draw("same");
    
-    c3->SaveAs("/Users/hannahbossi/Documents/LocalCode/RunPrep/plots/UnpackerChecks/sumMinusCorr.pdf");
+    c3->SaveAs(Form("/Users/hannahbossi/Documents/LocalCode/RunPrep/plots/UnpackerChecks/Run%d/sumMinusCorr.pdf", runNumber));
  
     //histogram 4: sum plus correlation plots
     TCanvas* c4 = new TCanvas("c4", "c4", 800, 600);
@@ -111,7 +111,7 @@ void plotUnpackerChecks(){
     leg4->AddEntry((TObject*)0, Form("Mean Unpack: %.4f", corrPlus->GetMean(2)), "");
     leg4->AddEntry((TObject*)0, Form("RMS Unpack: %.4f", corrPlus->GetRMS(2)), "");
     leg4->Draw("same");
-    c4->SaveAs("/Users/hannahbossi/Documents/LocalCode/RunPrep/plots/UnpackerChecks/sumPlusCorr.pdf");
+    c4->SaveAs(Form("/Users/hannahbossi/Documents/LocalCode/RunPrep/plots/UnpackerChecks/Run%d/sumPlusCorr.pdf", runNumber));
  
 
     // histogram 5: summary
@@ -121,7 +121,7 @@ void plotUnpackerChecks(){
     TCanvas* c5 = new TCanvas("c5", "c5", 800, 600);
     c5->SetLogy(); 
     summary->Draw();
-    c5->SaveAs("/Users/hannahbossi/Documents/LocalCode/RunPrep/plots/UnpackerChecks/summary.pdf");
+    c5->SaveAs(Form("/Users/hannahbossi/Documents/LocalCode/RunPrep/plots/UnpackerChecks/Run%d/summary.pdf", runNumber));
 
     
 }
