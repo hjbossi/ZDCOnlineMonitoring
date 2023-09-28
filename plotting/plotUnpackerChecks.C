@@ -3,11 +3,11 @@
 * Hannah Bossi, <hannah.bossi@cern.ch>, 9/24/2023
 */
 
-void plotUnpackerChecks(int runNumber = 374200){
+void plotUnpackerChecks(int runNumber = 374288){
     gStyle->SetOptStat(0);
 
     // histogram 1: sum minus vs. global bx
-    TFile* inFile = new TFile(Form("/Users/hannahbossi/Documents/LocalCode/RunPrep/outputFiles/unpackerTest_Run%d.root", runNumber));
+    TFile* inFile = new TFile(Form("/Users/hannahbossi/Documents/LocalCode/RunPrep/outputFiles/unpackerTest_Run%d_ZB.root", runNumber));
     TH1D* sumMinusBx = (TH1D*)inFile->Get("sumMinusBx");
     sumMinusBx->SetLineColor(kRed);
     sumMinusBx->SetMarkerColor(kRed);
@@ -68,12 +68,12 @@ void plotUnpackerChecks(int runNumber = 374200){
     corrMinus->GetXaxis()->SetTitle("Sum minus from emulator");
     corrMinus->GetYaxis()->SetTitle("Sum minus from unpacker");
     corrMinus->SetMarkerStyle(20);
-    corrMinus->SetMarkerSize(1.5);
+    corrMinus->SetMarkerSize(2);
     corrMinus->SetTitle(""); 
     corrMinus->SetMarkerColor(kBlack);
-    corrMinus->GetXaxis()->SetRangeUser(0, 50);
-    corrMinus->GetYaxis()->SetRangeUser(0, 50);
-    corrMinus->Draw();
+    corrMinus->GetXaxis()->SetRangeUser(0, 500);
+    corrMinus->GetYaxis()->SetRangeUser(0, 500);
+    corrMinus->Draw("colz");
     // create new tlegend with summary statistics (no histograms)
     TLegend* leg3 = new TLegend(0.16, 0.7, 0.3, 0.85);
     leg3->SetBorderSize(0);
@@ -93,13 +93,13 @@ void plotUnpackerChecks(int runNumber = 374200){
     TH2D* corrPlus = (TH2D*)inFile->Get("sumPlusCorr");
     corrPlus->GetXaxis()->SetTitle("Sum plus from emulator");
     corrPlus->GetYaxis()->SetTitle("Sum plus from unpacker");
-    corrPlus->GetXaxis()->SetRangeUser(0, 50);
-    corrPlus->GetYaxis()->SetRangeUser(0, 50);
+    corrPlus->GetXaxis()->SetRangeUser(0, 500);
+    corrPlus->GetYaxis()->SetRangeUser(0, 500);
     corrPlus->SetMarkerStyle(20);
-    corrPlus->SetMarkerSize(1.5);
+    corrPlus->SetMarkerSize(2);
     corrPlus->SetMarkerColor(kBlack);
     corrPlus->SetTitle(""); 
-    corrPlus->Draw();
+    corrPlus->Draw("colz");
 
     // create new tlegend with summary statistics (no histograms)
     TLegend* leg4 = new TLegend(0.16, 0.7, 0.3, 0.85);
