@@ -9,15 +9,19 @@ int hexToDecimal(char hexadecimalnumber[30]);
 void createLUT_FromHCALLUT(int capid = 0) {
   // side=0 -> Negative: NEM1, NEM2, NEM3, NEM4, NEM5, NHD1, NHD2, NHD3, NHD4,
   // side=1 -> Positive: PEM1, PEM2, PEM3, PEM4, PEM5, PHD1, PHD2, PHD3, PHD4
-
   // read in XML file
-  std::string xmlfile = "/afs/cern.ch/user/m/mkrohn/public/HCALtrigger/Run3Sept2023_HI_v4.3/Run3Sept2023_HI_v4.3.xml";
-  //std::cout << "Reading XML file " << xmlfile << std::endl;
+  std::string xmlfile = "Run3Sept2023_v5.xml";
   std::ifstream infile(xmlfile.c_str());
-  std::string line;
+  if( !infile ){
+    std::cout << "[Error]: Can't open " << xmlfile.c_str() << std::endl;
+    exit(-1);
+  }
+  std::string line = "";
 
   bool doOOTPU = true; 
+  bool doDebug = false;
 
+  if(doDebug)std::cout << "Reading XML file " << xmlfile << std::endl;
   // read in calibration constants
   double QIE10_regular_fC_full[256][18]; // [ibit][idet]
   int zdcLines = 0;
@@ -31,7 +35,7 @@ void createLUT_FromHCALLUT(int capid = 0) {
   int idet = 0;
   while (std::getline(infile, line)) {
     // initialize the variables we need 
-    //std::cout << line << std::endl;
+    if(doDebug)std::cout << line << std::endl;
     if (line.find("<CFGBrick>") != std::string::npos){
       iPHI = 0;
       iFIBER = 0;
@@ -47,7 +51,6 @@ void createLUT_FromHCALLUT(int capid = 0) {
         phi = phi + newline;
         pos = pos + 1;
       }
-
       iPHI = std::stoi(phi);
     }
     else if(line.find("<Parameter name=\"FIBER\" type=\"int\">") != std::string::npos){
@@ -71,18 +74,19 @@ void createLUT_FromHCALLUT(int capid = 0) {
       }
 
       iFIBERCHAN = std::stoi(fibchan);
-      //std::cout << "phi = " << IPHI << std::endl;
     }
     // line format
     else if (line.find("<Data elements=\"256\" encoding=\"hex\">") != std::string::npos){
       if(iPHI == -1000){
         int idet = fiberToIdet(iFIBER, iFIBERCHAN);
         if (idet != -1){
-          // std::cout << "------- starting new entry --------" << std::endl;
-          // std::cout << "found the zdc " << line << std::endl;
-          // std::cout << " fiber " << iFIBER << std::endl;
-          // std::cout << " fiberchan " << iFIBERCHAN << std::endl;
-          // std::cout << " idet = " << idet << std::endl;
+	  if(doDebug){
+	    std::cout << "------- starting new entry --------" << std::endl;
+	    std::cout << "found the zdc " << line << std::endl;
+	    std::cout << " fiber " << iFIBER << std::endl;
+	    std::cout << " fiberchan " << iFIBERCHAN << std::endl;
+	    std::cout << " idet = " << idet << std::endl;
+	  }
           zdcLines = zdcLines + 1;
           //std::cout << "--------------------------" << std::endl;
           int globalpos = 40; 
@@ -109,14 +113,13 @@ void createLUT_FromHCALLUT(int capid = 0) {
 		QIE10_regular_fC_full[index][idet] = decimal;
 	      }
 	    }
-            //std::cout << "index " << index << " decimal " << decimal << " "; 
+            if(doDebug)std::cout << "index " << index << " decimal " << decimal << " "; 
             index = index + 1;
           }
         }
       } 
     }
   }
-  // std::cout << "zdcLines = " << zdcLines << std::endl;
 
  
 
@@ -125,8 +128,8 @@ void createLUT_FromHCALLUT(int capid = 0) {
   //Flattened output
   const double scalingFactor = 1.0;
   std::cout << std::endl;
-  std::cout << "# ZDC LUT for HI running 2023, Dummy Implementation (always return 1)" << std::endl;
-  //  std::cout << "# ZDC LUT for HI running 2023, first pass implementation" << std::endl;
+  //std::cout << "# ZDC LUT for HI running 2023, Dummy Implementation (always return 1)" << std::endl;
+  std::cout << "# ZDC LUT for HI running 2023, commissioning implementation" << std::endl;
   std::cout << "# Scaling factor of " << (int)scalingFactor << " used for double -> int conversion" << std::endl;
   std::cout << "#<header> V1 13 32 </header>" << std::endl;
   std::cout << std::endl;
@@ -137,7 +140,6 @@ void createLUT_FromHCALLUT(int capid = 0) {
   ++index;
   for (int idet = 0; idet < 18; idet++) {
     for (int ibit = 0; ibit < 256; ibit++) {
-      //std::cout << " nom " << (int)(QIE10_regular_fC_full[ibit][idet]) << " ootpu " <<  (int)(QIE10_regular_fC_full_OOTPU[ibit][idet]*scalingFactor) << std::endl;
       std::cout << index << " " << (int)(QIE10_regular_fC_full[ibit][idet]*scalingFactor) << " # [index ibit=" << ibit << "], [index idet=" << idet << "]" << std::endl;
       ++index;
     }
