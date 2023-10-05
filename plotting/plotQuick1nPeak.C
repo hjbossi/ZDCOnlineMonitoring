@@ -65,13 +65,13 @@ void FillChain(TChain &chain, vector<string> &files) {
 // input: folder of l1ntuples to read from - must contain the branches specified above
 // verbose: whether or not to print out the full output (error messgaes will always be printed)
 int plotQuick1nPeak(
-		  char const *input = "/Users/hannahbossi/HiForest/") {
+		  char const *input = "/eos/cms/store/group/phys_heavyions/yuchenc/run3RapidValidation/run374730_0003/231005_110505/0000/") {
 
 
     gStyle->SetOptStat(0);
     gStyle->SetOptTitle(0);
 
-    string tag = "Run347719"; 
+    string tag = "Run347730"; 
 
 
   /* read in all files in the input folder */
@@ -100,16 +100,32 @@ int plotQuick1nPeak(
   TTreeReaderValue<int> zdcJet28(trigReader, "L1_SingleJet28_ZDC1n_XOR_BptxAND");
 
 
+  /* read in the primary vertex filter*/
+  TChain vertexChain("skimanalysis/HltTree");
+  FillChain(vertexChain, files);
+  TTreeReader vertexReader(&vertexChain);
+  TTreeReaderValue<int> vertex(vertexReader, "pprimaryVertexFilter");
 
+    /* read in the primary vertex filter*/
+  TChain l1tChain("l1object/L1UpgradeFlatTree");
+  FillChain(l1tChain, files);
+  TTreeReader emuReader(&l1tChain);
+  TTreeReaderValue<vector<float>> emuJetPt(emuReader, "jetEt");
 
 
   /* create histograms */
 
     TH1D* hZDCP = new TH1D("hZDCP", "ZDC Plus", 100, 0, 8000);
     TH1D* hZDCM = new TH1D("hZDCM", "ZDC Minus", 100, 0, 8000);
+
+    TH1D* hZDCP_1n = new TH1D("hZDCP_1n", "ZDC Plus 1n", 100, 0, 8000);
+    TH1D* hZDCM_1n = new TH1D("hZDCM_1n", "ZDC Minus 1n", 100, 0, 8000);
  
     TH1D* hZDCP_ZDCOR = new TH1D("hZDCP_ZDCOR", "ZDC Plus - ZDC OR", 100, 0, 8000);
     TH1D* hZDCM_ZDCOR = new TH1D("hZDCM_ZDCOR", "ZDC Minus - ZDC OR", 100, 0, 8000);
+
+    TH1D* hZDCP_ZDCXOR_Mock = new TH1D("hZDCP_ZDCXOR Mock", "ZDC Plus - ZDC OR", 100, 0, 8000);
+    TH1D* hZDCM_ZDCXOR_Mock = new TH1D("hZDCM_ZDCXOR Mock", "ZDC Minus - ZDC OR", 100, 0, 8000);
 
     TH1D* hZDCP_ZDCJet8 = new TH1D("hZDCP_ZDCJet8", "ZDC Plus - ZDC Jet 8", 100, 0, 8000);
     TH1D* hZDCM_ZDCJet8 = new TH1D("hZDCM_ZDCJet8", "ZDC Minus - ZDC Jet 8", 100, 0, 8000);
@@ -130,24 +146,81 @@ int plotQuick1nPeak(
     TH1D* hZDCM_ZDCJet28 = new TH1D("hZDCM_ZDCJet28", "ZDC Minus - ZDC Jet 28", 100, 0, 8000);
 
 
+  int countZDCOROnline = 0; 
+  int countZDCXORMock = 0; 
+  int countZDCXORConservative = 0; 
+  int countZDCjet8 = 0;
+  int countZDCjet8_Conservative = 0;
+  int countMockZDCORJet8 = 0; 
   Long64_t totalEvents = zdcReader.GetEntries(true);
   for (Long64_t i = 0; i < totalEvents; i++) {
-    zdcReader.Next(); trigReader.Next();
+    zdcReader.Next(); trigReader.Next(); vertexReader.Next(); emuReader.Next();
+    //if(*vertex != 1) continue;
 
     if (i % 10000 == 0) {
       cout << "Event " << i << endl;
     }
 
+    float emuMaxJetPt = -999;
+    float totl1jets = totl1jets + (*emuJetPt).size();
+    /* iterate through emu jets and find matched and unmatched jets with max pT */
+    for (size_t j = 0; j < (*emuJetPt).size(); ++j) {
+        if ((*emuJetPt)[j] > emuMaxJetPt) {
+            emuMaxJetPt = (*emuJetPt)[j];
+        }
+    }
+
     hZDCP->Fill(*sumPlus);
     hZDCM->Fill(*sumMinus);
 
+    int lowThreshold = 1050; 
+    int highThreshold = 1150; 
+
+    if(*sumPlus > lowThreshold && *sumMinus < highThreshold){
+      countZDCXORConservative++;
+       if(emuMaxJetPt >= 8){
+        countZDCjet8_Conservative++;
+      }
+    }
+
+    if(*sumPlus < highThreshold && *sumMinus > lowThreshold){
+      countZDCXORConservative++;
+        if(emuMaxJetPt >= 8){
+        countZDCjet8_Conservative++;
+      }
+    }
+
+    if(*sumPlus < 1100 && *zdcOR == 1){
+      countZDCXORMock++;
+      hZDCM_ZDCXOR_Mock->Fill(*sumMinus);
+      if(emuMaxJetPt >= 8){
+        countMockZDCORJet8++; 
+      }
+    }
+    if(*sumMinus < 1100 && *zdcOR == 1){
+      countZDCXORMock++;
+      hZDCP_ZDCXOR_Mock->Fill(*sumPlus);
+      if(emuMaxJetPt >= 8){
+        countMockZDCORJet8++; 
+      }
+    }
+
+    if(*sumPlus > 1100){
+      hZDCP_1n->Fill(*sumPlus);
+    }
+    if(*sumMinus > 1100){
+      hZDCM_1n->Fill(*sumMinus);
+    }
+
 
     if(*zdcOR == 1){
+      countZDCOROnline++; 
       hZDCP_ZDCOR->Fill(*sumPlus);
       hZDCM_ZDCOR->Fill(*sumMinus);
     }
 
     if(*zdcJet8 == 1){
+      countZDCjet8++;
       hZDCP_ZDCJet8->Fill(*sumPlus);
       hZDCM_ZDCJet8->Fill(*sumMinus);
     }
@@ -180,12 +253,23 @@ int plotQuick1nPeak(
 
 
   } // end loop over  the  number of events
+  std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
+  std::cout << "Finished processing " << totalEvents << " events." << std::endl;
+  std::cout << "ZDC OR fired " << countZDCOROnline << " times for a fraction of " << double(countZDCOROnline)/double(totalEvents) << std::endl;
+  std::cout << "ZDC XOR fired " << countZDCXORMock << " times for a fraction of " << double(countZDCXORMock)/double(totalEvents) << std::endl;
+  std::cout << "ZDC Conservative XOR fired " << countZDCXORConservative << " times for a fraction of " << double(countZDCXORConservative)/double(totalEvents) << std::endl;
+  std::cout << "ZDC XOR Jet 8 fired " << countZDCjet8 << " times for a fraction of " << double(countZDCjet8)/double(totalEvents) << std::endl;
+  std::cout << "Mock ZDC XOR  + Jet 8 fired " << countMockZDCORJet8 << " times for a fraction of " << double(countMockZDCORJet8)/double(totalEvents) << std::endl;
+  std::cout << "ZDC Conservative Jet 8 fired " << countZDCjet8_Conservative << " times for a fraction of " << double(countZDCjet8_Conservative)/double(totalEvents) << std::endl;
+  std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
 
 
-    TFile* outfile = new TFile("TriggerCheck_October3rd.root","RECREATE");
+    TFile* outfile = new TFile(Form("TriggerCheck_October5th_%s.root", tag.c_str()), "RECREATE");
     outfile->cd();
     hZDCP->Write();
     hZDCM->Write();
+    hZDCM_ZDCXOR_Mock->Write(); 
+    hZDCP_ZDCXOR_Mock->Write();
     hZDCP_ZDCOR->Write();
     hZDCM_ZDCOR->Write();
     hZDCP_ZDCJet8->Write();
@@ -200,11 +284,21 @@ int plotQuick1nPeak(
     hZDCM_ZDCJet24->Write();
     hZDCP_ZDCJet28->Write();
     hZDCM_ZDCJet28->Write();
+    hZDCP_1n->Write();
+    hZDCM_1n->Write();
     outfile->Close();
+
+
+    TLatex* cms = new TLatex(0.10,0.92,"#bf{CMS} #it{Internal} Run 374730");
+    cms->SetNDC();
+    cms->SetTextSize(0.05);
+    cms->SetTextFont(42);
 
     // ------------------------------------------
     /* ZDC Plus and Minus */
     // ------------------------------------------
+
+   
 
     TLegend* leg3 = new TLegend(0.65,0.7,0.8,0.85);
     leg3->SetBorderSize(0);
@@ -216,7 +310,7 @@ int plotQuick1nPeak(
     c3->SetTickx(1);
     c3->SetTicky(1);
     c3->SetLogy(); 
-    c3->SetTopMargin(0.05);
+    c3->SetTopMargin(0.09);
     c3->SetBottomMargin(0.11);
     c3->SetLeftMargin(0.09);
     c3->SetRightMargin(0.05);
@@ -240,6 +334,7 @@ int plotQuick1nPeak(
     leg3->AddEntry(hZDCP,"ZDC Plus","l");
     leg3->AddEntry(hZDCM,"ZDC Minus","l");
     leg3->Draw("same");
+    cms->Draw("same");
     c3->SaveAs(Form("Online_ZDCNeutronDistributions_%s.pdf", tag.c_str()));
 
 
@@ -257,7 +352,7 @@ int plotQuick1nPeak(
     c4->SetTickx(1);
     c4->SetTicky(1);
     c4->SetLogy(); 
-    c4->SetTopMargin(0.05);
+    c4->SetTopMargin(0.09);
     c4->SetBottomMargin(0.11);
     c4->SetLeftMargin(0.09);
     c4->SetRightMargin(0.05);
@@ -281,6 +376,7 @@ int plotQuick1nPeak(
     leg4->AddEntry(hZDCP_ZDCOR,"ZDC Plus ZDC OR","l");
     leg4->AddEntry(hZDCM,"ZDC Minus ZDC OR","l");
     leg4->Draw("same");
+     cms->Draw("same");
     c4->SaveAs(Form("Online_ZDCORTriggered_%s.pdf", tag.c_str()));
 
 
@@ -298,7 +394,7 @@ int plotQuick1nPeak(
     c5->SetTickx(1);
     c5->SetTicky(1);
     c5->SetLogy();
-    c5->SetTopMargin(0.05);
+    c5->SetTopMargin(0.09);
     c5->SetBottomMargin(0.11);
     c5->SetLeftMargin(0.09);
     c5->SetRightMargin(0.05);
@@ -322,6 +418,7 @@ int plotQuick1nPeak(
     leg5->AddEntry(hZDCP_ZDCJet8,"ZDC Plus ZDC Jet 8","l");
     leg5->AddEntry(hZDCM,"ZDC Minus ZDC Jet 8","l");
     leg5->Draw("same");
+     cms->Draw("same");
     c5->SaveAs(Form("Online_ZDCJet8Triggered_%s.pdf", tag.c_str()));
 
      // ------------------------------------------
@@ -338,7 +435,7 @@ int plotQuick1nPeak(
     c6->SetTickx(1);
     c6->SetTicky(1);
     c6->SetLogy();
-    c6->SetTopMargin(0.05);
+    c6->SetTopMargin(0.09);
     c6->SetBottomMargin(0.11);
     c6->SetLeftMargin(0.09);
     c6->SetRightMargin(0.05);
@@ -362,6 +459,7 @@ int plotQuick1nPeak(
     leg6->AddEntry(hZDCP_ZDCJet12,"ZDC Plus ZDC Jet 12","l");
     leg6->AddEntry(hZDCM,"ZDC Minus ZDC Jet 12","l");
     leg6->Draw("same");
+     cms->Draw("same");
 
     c6->SaveAs(Form("Online_ZDCJet12Triggered_%s.pdf", tag.c_str()));
 
@@ -379,7 +477,7 @@ int plotQuick1nPeak(
     c7->SetTickx(1);
     c7->SetTicky(1);
     c7->SetLogy();
-    c7->SetTopMargin(0.05);
+    c7->SetTopMargin(0.09);
     c7->SetBottomMargin(0.11);
     c7->SetLeftMargin(0.09);
     c7->SetRightMargin(0.05);
@@ -403,6 +501,7 @@ int plotQuick1nPeak(
     leg7->AddEntry(hZDCP_ZDCJet16,"ZDC Plus ZDC Jet 16","l");
     leg7->AddEntry(hZDCM,"ZDC Minus ZDC Jet 16","l");
     leg7->Draw("same");
+     cms->Draw("same");
 
     c7->SaveAs(Form("Online_ZDCJet16Triggered_%s.pdf", tag.c_str()));
 
@@ -420,7 +519,7 @@ int plotQuick1nPeak(
     c8->SetTickx(1);
     c8->SetTicky(1);
     c8->SetLogy();
-    c8->SetTopMargin(0.05);
+    c8->SetTopMargin(0.09);
     c8->SetBottomMargin(0.11);
     c8->SetLeftMargin(0.09);
     c8->SetRightMargin(0.05);
@@ -444,6 +543,7 @@ int plotQuick1nPeak(
     leg8->AddEntry(hZDCP_ZDCJet20,"ZDC Plus ZDC Jet 20","l");
     leg8->AddEntry(hZDCM,"ZDC Minus ZDC Jet 20","l");
     leg8->Draw("same");
+     cms->Draw("same");
 
     c8->SaveAs(Form("Online_ZDCJet20Triggered_%s.pdf", tag.c_str()));
 
@@ -461,7 +561,7 @@ int plotQuick1nPeak(
     c9->SetTickx(1);
     c9->SetTicky(1);
     c9->SetLogy();
-    c9->SetTopMargin(0.05);
+    c9->SetTopMargin(0.09);
     c9->SetBottomMargin(0.11);
     c9->SetLeftMargin(0.09);
     c9->SetRightMargin(0.05);
@@ -485,6 +585,7 @@ int plotQuick1nPeak(
     leg9->AddEntry(hZDCP_ZDCJet24,"ZDC Plus ZDC Jet 24","l");
     leg9->AddEntry(hZDCM,"ZDC Minus ZDC Jet 24","l");
     leg9->Draw("same");
+     cms->Draw("same");
 
     c9->SaveAs(Form("Online_ZDCJet24Triggered_%s.pdf", tag.c_str()));
 
@@ -503,7 +604,7 @@ int plotQuick1nPeak(
     c10->SetTickx(1);
     c10->SetTicky(1);
     c10->SetLogy();
-    c10->SetTopMargin(0.05);
+    c10->SetTopMargin(0.09);
     c10->SetBottomMargin(0.11);
     c10->SetLeftMargin(0.09);
     c10->SetRightMargin(0.05);
@@ -527,10 +628,103 @@ int plotQuick1nPeak(
     leg10->AddEntry(hZDCP_ZDCJet28,"ZDC Plus ZDC Jet 28","l");
     leg10->AddEntry(hZDCM,"ZDC Minus ZDC Jet 28","l");
     leg10->Draw("same");
+     cms->Draw("same");
 
     c10->SaveAs(Form("Online_ZDCJet28Triggered_%s.pdf", tag.c_str()));
 
+    // ------------------------------------------
+    /* ZDC OR TURN ON */
+    // ------------------------------------------
+
+    TLegend* leg11 = new TLegend(0.4,0.7,0.6,0.85);
+    leg11->SetBorderSize(0);
+    leg11->SetFillStyle(0);
+    leg11->SetTextSize(0.045);
     
+    TCanvas* c11 = new TCanvas("c11","c11",800,600);
+    c11->cd();
+    c11->SetTickx(1);
+    c11->SetTicky(1);
+    // c4->SetLogy(); 
+    c11->SetTopMargin(0.09);
+    c11->SetBottomMargin(0.11);
+    c11->SetLeftMargin(0.09);
+    c11->SetRightMargin(0.05);
+
+    // clone zdc OR hists
+    TH1D* hZDCP_ZDCOR_clone = (TH1D*)hZDCP_1n->Clone();
+    TH1D* hZDCM_ZDCOR_clone = (TH1D*)hZDCM_1n->Clone();
+
+    // divide by hZDCP and hZDCM
+    hZDCP_ZDCOR_clone->Divide(hZDCP);
+    hZDCM_ZDCOR_clone->Divide(hZDCM);
+
+    // zdc plus
+    hZDCP_ZDCOR_clone->SetLineColor(kRed);
+    hZDCP_ZDCOR_clone->SetLineWidth(2);
+    hZDCP_ZDCOR_clone->SetMarkerStyle(20);
+    hZDCP_ZDCOR_clone->GetXaxis()->SetTitleSize(0.05);
+    hZDCP_ZDCOR_clone->SetMarkerStyle(20);
+    hZDCP_ZDCOR_clone->GetXaxis()->SetTitle("ZDC Energy Sum (GeV)");
+  
+
+    // zdc minus
+    hZDCM_ZDCOR_clone->SetLineColor(kBlue);
+    hZDCM_ZDCOR_clone->SetLineWidth(2);
+    hZDCM_ZDCOR_clone->SetMarkerStyle(20);
+    hZDCM_ZDCOR_clone->GetXaxis()->SetTitle("ZDC Energy Sum (GeV)");
+    hZDCM_ZDCOR_clone->GetYaxis()->SetTitle("Efficiency");
+    hZDCM_ZDCOR_clone->GetXaxis()->SetTitleSize(0.05);
+    hZDCM_ZDCOR_clone->GetYaxis()->SetRangeUser(0,1.1);
+    hZDCM_ZDCOR_clone->Draw();
+    hZDCP_ZDCOR_clone->Draw("same");
+    leg11->AddEntry(hZDCP_ZDCOR_clone,"ZDC Plus ZDC OR","l");
+    leg11->AddEntry(hZDCM_ZDCOR_clone,"ZDC Minus ZDC OR","l");
+    leg11->Draw("same");
+     cms->Draw("same");
+    c11->SaveAs(Form("TurnOn_Online_ZDCORTriggered%s.pdf", tag.c_str()));
+
+
+    // ------------------------------------------
+    /* ZDC XOR */
+    // ------------------------------------------
+
+    TLegend* leg12 = new TLegend(0.4,0.7,0.6,0.85);
+    leg12->SetBorderSize(0);
+    leg12->SetFillStyle(0);
+    leg12->SetTextSize(0.045);
+    
+    TCanvas* c12 = new TCanvas("c12","c12",800,600);
+    c12->cd();
+    c12->SetTickx(1);
+    c12->SetTicky(1);
+    c12->SetLogy(); 
+    c12->SetTopMargin(0.09);
+    c12->SetBottomMargin(0.11);
+    c12->SetLeftMargin(0.09);
+    c12->SetRightMargin(0.05);
+
+    // zdc plus
+    hZDCP_ZDCXOR_Mock->SetLineColor(kRed);
+    hZDCP_ZDCXOR_Mock->SetLineWidth(2);
+    hZDCP_ZDCXOR_Mock->GetXaxis()->SetTitleSize(0.05);
+    hZDCP_ZDCXOR_Mock->SetMarkerStyle(20);
+    hZDCP_ZDCXOR_Mock->GetXaxis()->SetTitle("ZDC Energy Sum (GeV)");
+  
+
+    // zdc minus
+    hZDCM_ZDCXOR_Mock->SetLineColor(kBlue);
+    hZDCM_ZDCXOR_Mock->SetLineWidth(2);
+    hZDCM_ZDCXOR_Mock->SetMarkerStyle(20);
+    hZDCM_ZDCXOR_Mock->GetXaxis()->SetTitle("ZDC Energy Sum (GeV)");
+    hZDCM_ZDCXOR_Mock->GetXaxis()->SetTitleSize(0.05);
+    hZDCM_ZDCXOR_Mock->Draw();
+    hZDCP_ZDCXOR_Mock->Draw("same");
+    leg12->AddEntry(hZDCP_ZDCXOR_Mock,"ZDC Plus ZDC XOR Mock","l");
+    leg12->AddEntry(hZDCM_ZDCXOR_Mock,"ZDC Minus ZDC XOR Mock","l");
+    leg12->Draw("same");
+     cms->Draw("same");
+    c12->SaveAs(Form("Online_ZDCXORMockTriggered_%s.pdf", tag.c_str()));
 
   return 1;
 }

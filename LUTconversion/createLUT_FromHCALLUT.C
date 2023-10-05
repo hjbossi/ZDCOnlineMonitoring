@@ -10,7 +10,7 @@ void createLUT_FromHCALLUT(int capid = 0) {
   // side=0 -> Negative: NEM1, NEM2, NEM3, NEM4, NEM5, NHD1, NHD2, NHD3, NHD4,
   // side=1 -> Positive: PEM1, PEM2, PEM3, PEM4, PEM5, PHD1, PHD2, PHD3, PHD4
   // read in XML file
-  std::string xmlfile = "Run3Sept2023_v5.xml";
+  std::string xmlfile = "ZDC_newQIEData.xml";
   std::ifstream infile(xmlfile.c_str());
   if( !infile ){
     std::cout << "[Error]: Can't open " << xmlfile.c_str() << std::endl;
@@ -275,6 +275,7 @@ int fiberToIdet(int fiber, int fibchan){
     std::cout << "ERROR: fiber = " << fiber << " fiberchan = " << fibchan << " not recognized." << std::endl;
   }  
   int ihitid = (zside == 1 ? 9 : 0) + (section == 2 ? 5 : 0) + (channel - 1);
+  std::cout << ihitid << std::endl;
   return ihitid;
 }
 
