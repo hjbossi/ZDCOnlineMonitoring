@@ -1088,12 +1088,12 @@ void FillChain(TChain &chain, vector<string> &files) {
   }
 }
 
-void plotZDCAnalyzer( char const *input = "/eos/user/h/hbossi/CMSSW_13_2_4/src/Run374730_NextLUT/"){
+void plotZDCAnalyzer( char const *input = "/eos/cms/store/group/phys_heavyions/yuchenc/run3RapidValidation/run374768/231005_151737/0000/"){
 
     gStyle->SetOptStat(0);
     gStyle->SetOptTitle(0);
 
-    string tag = "Run374730_NextlLUT"; 
+    string tag = "ZDCTest"; 
 
     /* read in all files in the input folder */
     vector<string> files;
@@ -1111,13 +1111,13 @@ void plotZDCAnalyzer( char const *input = "/eos/user/h/hbossi/CMSSW_13_2_4/src/R
     TTreeReaderArray<int> adc(zdcReader, "adcTs2");
     TTreeReaderValue<int> N(zdcReader, "n");
 
-    /* read in emulated information */
-    TChain emuChain("l1UpgradeEmuTree/L1UpgradeTree");
-    FillChain(emuChain, files);
-    TTreeReader emuReader(&emuChain);
-    TTreeReaderValue<vector<float> > emuSum(emuReader, "sumZDCEt");
-    TTreeReaderValue<vector<short>> emuType(emuReader, "sumZDCType"); 
-    TTreeReaderValue<vector<float>>	emuBx(emuReader, "sumZDCBx");
+    // /* read in emulated information */
+    // TChain emuChain("l1UpgradeEmuTree/L1UpgradeTree");
+    // FillChain(emuChain, files);
+    // TTreeReader emuReader(&emuChain);
+    // TTreeReaderValue<vector<float> > emuSum(emuReader, "sumZDCEt");
+    // TTreeReaderValue<vector<short>> emuType(emuReader, "sumZDCType"); 
+    // TTreeReaderValue<vector<float>>	emuBx(emuReader, "sumZDCBx");
 
 
     TH1D* hZDCP = new TH1D("hZDCP", "ZDC Plus", 100, 0, 8000);
@@ -1125,66 +1125,87 @@ void plotZDCAnalyzer( char const *input = "/eos/user/h/hbossi/CMSSW_13_2_4/src/R
 
     TH1D* hZDCP_Emu = new TH1D("hZDCP_Emu", "ZDC Plus Emulated", 50, 0, 100);
     TH1D* hZDCM_Emu = new TH1D("hZDCM_Emu", "ZDC Minus Emulated", 50, 0, 100);
+
+    TH1D* hHADM1 = new TH1D("hHAD1", "hHAD1", 1000, 0 , 5000); 
+    TH1D* hHADM1_2023 = new TH1D("hHAD1_2023", "hHAD1_2023", 1000, 0 , 5000); 
+
+    TH1D* hHADM2 = new TH1D("hHAD2", "hHAD2", 1000, 0 , 5000); 
+    TH1D* hHADM2_2023 = new TH1D("hHAD2_2023", "hHAD2_2023", 1000, 0 , 5000); 
   
 
     Long64_t totalEvents = zdcReader.GetEntries(true);
     for (Long64_t i = 0; i < totalEvents; i++) {
-        zdcReader.Next(); emuReader.Next();
+        zdcReader.Next();
         hZDCP->Fill(*sumPlus);
         hZDCM->Fill(*sumMinus);
-        if((*emuSum)[4]*2 != 0){
-            std::cout << "sumZDCPlus: " << (*emuSum)[4]*2 << std::endl;
-            std::cout << "sumZDCMinus: " << (*emuSum)[5]*2 << std::endl;
-        }
+        // if((*emuSum)[4]*2 != 0){
+        //     std::cout << "sumZDCPlus: " << (*emuSum)[4]*2 << std::endl;
+        //     std::cout << "sumZDCMinus: " << (*emuSum)[5]*2 << std::endl;
+        // }
+
+        unsigned short adcValHAD1 = (unsigned short)adc[8];
+        double cHDM1 = QIE10_regular_fC_full[adcValHAD1][0];
+        double cHDM1_2023 =  QIE10_regular_fC_2023[adcValHAD1][0];
+
+        hHADM1->Fill(cHDM1);
+        hHADM1_2023->Fill(cHDM1_2023);
+
+        unsigned short adcValHAD2 = (unsigned short)adc[20];
+        double cHDM2 = QIE10_regular_fC_full[adcValHAD2][0];
+        double cHDM2_2023 =  QIE10_regular_fC_2023[adcValHAD2][0];
+
+        hHADM2->Fill(cHDM2);
+        hHADM2_2023->Fill(cHDM2_2023);
+
        
-        hZDCP_Emu->Fill((*emuSum)[4]*2);  
-        hZDCM_Emu->Fill((*emuSum)[5]*2);  
+        // hZDCP_Emu->Fill((*emuSum)[4]*2);  
+        // hZDCM_Emu->Fill((*emuSum)[5]*2);  
 
     } //end loop over the events 
 
 
-    TLatex* cms = new TLatex(0.10,0.92,"#bf{CMS} #it{Internal} Run 374730, Next LUT");
+    TLatex* cms = new TLatex(0.10,0.92,"#bf{CMS} #it{Internal} Run 374768");
     cms->SetNDC();
     cms->SetTextSize(0.05);
     cms->SetTextFont(42);
 
-    // plot
-    TLegend* leg3 = new TLegend(0.65,0.7,0.8,0.85);
-    leg3->SetBorderSize(0);
-    leg3->SetFillStyle(0);
-    leg3->SetTextSize(0.045);
+    // // plot
+    // TLegend* leg3 = new TLegend(0.65,0.7,0.8,0.85);
+    // leg3->SetBorderSize(0);
+    // leg3->SetFillStyle(0);
+    // leg3->SetTextSize(0.045);
 
 
-    TCanvas* c3 = new TCanvas("c3","c3",800,600);
-    c3->cd();
-    c3->SetTickx(1);
-    c3->SetTicky(1);
-    c3->SetLogy();
-    c3->SetTopMargin(0.09);
-    c3->SetBottomMargin(0.11);
-    c3->SetLeftMargin(0.09);
-    c3->SetRightMargin(0.05);
+    // TCanvas* c3 = new TCanvas("c3","c3",800,600);
+    // c3->cd();
+    // c3->SetTickx(1);
+    // c3->SetTicky(1);
+    // c3->SetLogy();
+    // c3->SetTopMargin(0.09);
+    // c3->SetBottomMargin(0.11);
+    // c3->SetLeftMargin(0.09);
+    // c3->SetRightMargin(0.05);
 
-    // zdc plus
-    hZDCP->SetLineColor(kRed);
-    hZDCP->SetLineWidth(2);
-    hZDCP->GetXaxis()->SetTitleSize(0.05);
-    hZDCP->SetMarkerStyle(20);
-    hZDCP->GetXaxis()->SetTitle("ZDC Energy Sum (GeV)");
+    // // zdc plus
+    // hZDCP->SetLineColor(kRed);
+    // hZDCP->SetLineWidth(2);
+    // hZDCP->GetXaxis()->SetTitleSize(0.05);
+    // hZDCP->SetMarkerStyle(20);
+    // hZDCP->GetXaxis()->SetTitle("ZDC Energy Sum (GeV)");
 
-    // zdc minus
-    hZDCM->SetLineColor(kBlue);
-    hZDCM->SetLineWidth(2);
-    hZDCM->SetMarkerStyle(20);
-    hZDCM->GetXaxis()->SetTitle("ZDC Energy Sum (GeV)");
-    hZDCM->GetXaxis()->SetTitleSize(0.05);
-    hZDCM->Draw();
-    hZDCP->Draw("same");
-    leg3->AddEntry(hZDCP,"ZDC Plus","l");
-    leg3->AddEntry(hZDCM,"ZDC Minus","l");
-    leg3->Draw("same");
-    cms->Draw("same");
-    c3->SaveAs(Form("ZDCNeutronDistributions_%s.pdf", tag.c_str()));
+    // // zdc minus
+    // hZDCM->SetLineColor(kBlue);
+    // hZDCM->SetLineWidth(2);
+    // hZDCM->SetMarkerStyle(20);
+    // hZDCM->GetXaxis()->SetTitle("ZDC Energy Sum (GeV)");
+    // hZDCM->GetXaxis()->SetTitleSize(0.05);
+    // hZDCM->Draw();
+    // hZDCP->Draw("same");
+    // leg3->AddEntry(hZDCP,"ZDC Plus","l");
+    // leg3->AddEntry(hZDCM,"ZDC Minus","l");
+    // leg3->Draw("same");
+    // cms->Draw("same");
+    // c3->SaveAs(Form("ZDCNeutronDistributions_%s.pdf", tag.c_str()));
 
     // plot emulated values
      // plot
@@ -1225,5 +1246,65 @@ void plotZDCAnalyzer( char const *input = "/eos/user/h/hbossi/CMSSW_13_2_4/src/R
     cms->Draw("same");
     c4->SaveAs(Form("ZDCNeutronDistributionsEmulated_%s.pdf", tag.c_str()));
 
+
+    // plot charge distributions for had 1 and 2 using 2023 values 
+    TLegend* leg5 = new TLegend(0.45,0.7,0.6,0.85);
+    leg5->SetBorderSize(0);
+    leg5->SetFillStyle(0);
+    leg5->SetTextSize(0.045);
+
+    TCanvas* c5 = new TCanvas("c5","c5",800,600);
+    c5->cd();
+    c5->SetTickx(1);
+    c5->SetTicky(1);
+    c5->SetLogy();
+    c5->SetTopMargin(0.09);
+    c5->SetBottomMargin(0.11);
+    c5->SetLeftMargin(0.09);
+    c5->SetRightMargin(0.05);
+
+    // hHADM1
+    hHADM1->SetLineColor(kRed);
+    hHADM1->SetLineWidth(2);
+    hHADM1->GetXaxis()->SetTitleSize(0.05);
+    hHADM1->SetMarkerStyle(20);
+    hHADM1->SetMarkerColor(kRed);
+    hHADM1->GetXaxis()->SetTitle("Charge (fC)");
+
+    // hHADM2
+    hHADM2->SetLineColor(kBlue);
+    hHADM2->SetMarkerColor(kBlue);
+    hHADM2->SetLineWidth(2);
+    hHADM2->SetMarkerStyle(20);
+    hHADM2->GetXaxis()->SetTitle("Charge (fC)");
+    hHADM2->GetXaxis()->SetTitleSize(0.05);
+    
+
+    hHADM1_2023->SetLineColor(kGreen+3);
+    hHADM1_2023->SetLineWidth(2);
+    hHADM1_2023->GetXaxis()->SetTitleSize(0.05);
+    hHADM1_2023->SetMarkerStyle(20);
+    hHADM1_2023->SetMarkerColor(kGreen+3);
+    hHADM1_2023->GetXaxis()->SetTitle("Charge (fC)");
+    hHADM1_2023->Draw("");
+
+    hHADM2_2023->SetLineColor(kBlack);
+    hHADM2_2023->SetLineWidth(2);
+    hHADM2_2023->SetMarkerStyle(20);
+    hHADM2_2023->SetMarkerColor(kBlack);
+    hHADM2_2023->GetXaxis()->SetTitle("Charge (fC)");
+    hHADM2_2023->GetXaxis()->SetTitleSize(0.05);
+    hHADM2_2023->Draw(" same");
+    hHADM1->Draw("same");
+    hHADM2->Draw("same");
+
+    leg5->AddEntry(hHADM1,"HAD 1 2018 QIE","l");
+    leg5->AddEntry(hHADM2,"HAD 2 2018 QIE","l");
+    leg5->AddEntry(hHADM1_2023,"HAD 1 2023 QIE","l");
+    leg5->AddEntry(hHADM2_2023,"HAD 2 2023 QIE","l");
+
+    leg5->Draw("same");
+    cms->Draw("same");
+    c5->SaveAs(Form("ZDCNeutronDistributionsCharge_%s.pdf", tag.c_str()));
 
 }
