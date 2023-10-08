@@ -10,7 +10,7 @@ void createLUT_FromHCALLUT(int capid = 0) {
   // side=0 -> Negative: NEM1, NEM2, NEM3, NEM4, NEM5, NHD1, NHD2, NHD3, NHD4,
   // side=1 -> Positive: PEM1, PEM2, PEM3, PEM4, PEM5, PHD1, PHD2, PHD3, PHD4
   // read in XML file
-  std::string xmlfile = "ZDC_newQIEData.xml";
+  std::string xmlfile = "ZDC_pedestalWitdthTest.xml";
   std::ifstream infile(xmlfile.c_str());
   if( !infile ){
     std::cout << "[Error]: Can't open " << xmlfile.c_str() << std::endl;
@@ -140,7 +140,18 @@ void createLUT_FromHCALLUT(int capid = 0) {
   ++index;
   for (int idet = 0; idet < 18; idet++) {
     for (int ibit = 0; ibit < 256; ibit++) {
-      std::cout << index << " " << (int)(QIE10_regular_fC_full[ibit][idet]*scalingFactor) << " # [index ibit=" << ibit << "], [index idet=" << idet << "]" << std::endl;
+      if(idet < 5){
+	std::cout << index << " " << 0 << " # [index ibit=" << ibit << "], [index idet=" << idet << "]" << std::endl;
+      }
+      else if(idet > 4  && idet < 9 ){
+	std::cout << index << " " << (int)(QIE10_regular_fC_full[ibit][idet]*scalingFactor) << " # [index ibit=" << ibit << "], [index idet=" << idet << "]" << std::endl;
+      }
+      else if(idet > 8 && idet < 14){
+	std::cout << index << " " << 0 << " # [index ibit=" << ibit << "], [index idet=" << idet << "]" << std::endl;
+      }
+      else{
+	std::cout << index << " " << (int)(QIE10_regular_fC_full[ibit][idet]*scalingFactor) << " # [index ibit=" << ibit << "], [index idet=" << idet << "]" << std::endl;
+      }
       ++index;
     }
   }

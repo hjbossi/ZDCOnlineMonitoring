@@ -1131,7 +1131,8 @@ void plotZDCAnalyzer( char const *input = "/eos/cms/store/group/phys_heavyions/y
 
     TH1D* hHADM2 = new TH1D("hHAD2", "hHAD2", 1000, 0 , 5000); 
     TH1D* hHADM2_2023 = new TH1D("hHAD2_2023", "hHAD2_2023", 1000, 0 , 5000); 
-  
+
+    TH2D* had2023 = new TH2D("had2023", "had2023", 1000, 0, 350000, 100, 1000, 350000);  
 
     Long64_t totalEvents = zdcReader.GetEntries(true);
     for (Long64_t i = 0; i < totalEvents; i++) {
@@ -1149,6 +1150,7 @@ void plotZDCAnalyzer( char const *input = "/eos/cms/store/group/phys_heavyions/y
 
         hHADM1->Fill(cHDM1);
         hHADM1_2023->Fill(cHDM1_2023);
+        had2023->Fill(cHDM1, cHDM1_2023);
 
         unsigned short adcValHAD2 = (unsigned short)adc[20];
         double cHDM2 = QIE10_regular_fC_full[adcValHAD2][0];
@@ -1306,5 +1308,20 @@ void plotZDCAnalyzer( char const *input = "/eos/cms/store/group/phys_heavyions/y
     leg5->Draw("same");
     cms->Draw("same");
     c5->SaveAs(Form("ZDCNeutronDistributionsCharge_%s.pdf", tag.c_str()));
+
+    TCanvas* c6 = new TCanvas("c6","c6",800,600);
+    c6->cd();
+    c6->SetTickx(1);
+    c6->SetTicky(1);
+    c6->SetTopMargin(0.09);
+    c6->SetBottomMargin(0.11);
+    c6->SetLeftMargin(0.09);
+    c6->SetRightMargin(0.05);
+
+    had2023->Draw("colz");
+    had2023->GetXaxis()->SetTitle("Charge (fC) 2018");
+    had2023->GetYaxis()->SetTitle("Charge (fC) 2023");
+    cms->Draw("same");
+    c6->SaveAs(Form("ZDCNeutronDistributionsChargeCorrelation_%s.pdf", tag.c_str()));
 
 }
