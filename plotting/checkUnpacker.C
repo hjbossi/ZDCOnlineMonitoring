@@ -62,10 +62,10 @@ void FillChain(TChain &chain, vector<string> &files) {
 }
 
 // params
-// input: folder of l1ntuples to read from - must contain the branches specified above
+// input: folder of l1ntuples to read from - must contain the branches specified above (change this to your own personal directory)
 // verbose: whether or not to print out the full output (error messgaes will always be printed)
 int checkUnpacker(
-		  char const *input = "/eos/user/h/hbossi/NewCMSSWTest/CMSSW_13_2_4/src/Run374106_Full/", bool verbose = false) {
+		  char const *input = "/afs/cern.ch/user/h/hbossi/ZDCOnlineMonitoring/python/ZDCFiles/", bool verbose = false) {
 
 
   /* read in all files in the input folder */
