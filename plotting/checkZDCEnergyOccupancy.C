@@ -30,6 +30,136 @@
 
 using namespace std;
 
+double QIE10_regular_fC[256][4] = {{1.62607, 1.62872, 1.63148, 1.63196}, {4.87821, 4.88615, 4.89444, 4.89588},
+{8.13035, 8.14359, 8.1574, 8.1598},   {11.3825, 11.401, 11.4204, 11.4237},
+{14.6346, 14.6585, 14.6833, 14.6876}, {17.8868, 17.9159, 17.9463, 17.9516},
+{21.1389, 21.1733, 21.2093, 21.2155}, {24.391, 24.4308, 24.4722, 24.4794},
+{27.6432, 27.6882, 27.7352, 27.7433}, {30.8953, 30.9456, 30.9981, 31.0072},
+{34.1475, 34.2031, 34.2611, 34.2712}, {37.3996, 37.4605, 37.5241, 37.5351},
+{40.6517, 40.7179, 40.787, 40.799},   {43.9039, 43.9754, 44.05, 44.0629},
+{47.156, 47.2328, 47.313, 47.3268},   {50.4081, 50.4902, 50.5759, 50.5908},
+{55.2864, 55.3764, 55.4704, 55.4866}, {61.7906, 61.8913, 61.9963, 62.0145},
+{68.2949, 68.4061, 68.5222, 68.5423}, {74.7992, 74.921, 75.0481, 75.0702},
+{81.3035, 81.4359, 81.5741, 81.598},  {87.8077, 87.9507, 88.1, 88.1259},
+{94.312, 94.4656, 94.6259, 94.6537},  {100.816, 100.98, 101.152, 101.182},
+{107.321, 107.495, 107.678, 107.709}, {113.825, 114.01, 114.204, 114.237},
+{120.329, 120.525, 120.73, 120.765},  {126.833, 127.04, 127.256, 127.293},
+{133.338, 133.555, 133.781, 133.821}, {139.842, 140.07, 140.307, 140.349},
+{146.346, 146.585, 146.833, 146.876}, {152.851, 153.099, 153.359, 153.404},
+{159.355, 159.614, 159.885, 159.932}, {165.859, 166.129, 166.411, 166.46},
+{172.363, 172.644, 172.937, 172.988}, {178.868, 179.159, 179.463, 179.516},
+{188.624, 188.931, 189.252, 189.307}, {201.633, 201.961, 202.304, 202.363},
+{214.641, 214.991, 215.355, 215.419}, {227.65, 228.02, 228.407, 228.474},
+{240.658, 241.05, 241.459, 241.53},   {253.667, 254.08, 254.511, 254.586},
+{266.675, 267.11, 267.563, 267.641},  {279.684, 280.139, 280.615, 280.697},
+{292.692, 293.169, 293.667, 293.753}, {305.701, 306.199, 306.718, 306.809},
+{318.71, 319.229, 319.77, 319.864},   {331.718, 332.258, 332.822, 332.92},
+{344.727, 345.288, 345.874, 345.976}, {357.735, 358.318, 358.926, 359.031},
+{370.744, 371.348, 371.978, 372.087}, {383.752, 384.377, 385.03, 385.143},
+{396.761, 397.407, 398.081, 398.198}, {409.769, 410.437, 411.133, 411.254},
+{422.778, 423.467, 424.185, 424.31},  {435.787, 436.496, 437.237, 437.365},
+{448.795, 449.526, 450.289, 450.421}, {468.308, 469.071, 469.867, 470.005},
+{494.325, 495.13, 495.97, 496.116},   {520.342, 521.19, 522.074, 522.227},
+{546.359, 547.249, 548.178, 548.339}, {572.376, 573.309, 574.281, 574.45},
+{598.393, 599.368, 600.385, 600.561}, {624.411, 625.428, 626.489, 626.673},
+{568.652, 566.063, 566.86, 568.124},  {594.369, 591.816, 592.657, 593.933},
+{620.087, 617.568, 618.453, 619.741}, {645.805, 643.321, 644.25, 645.549},
+{671.523, 669.073, 670.046, 671.357}, {697.24, 694.826, 695.843, 697.165},
+{722.958, 720.578, 721.639, 722.973}, {748.676, 746.331, 747.436, 748.781},
+{774.393, 772.083, 773.232, 774.589}, {800.111, 797.836, 799.029, 800.398},
+{825.829, 823.588, 824.825, 826.206}, {851.546, 849.34, 850.622, 852.014},
+{877.264, 875.093, 876.418, 877.822}, {902.982, 900.845, 902.214, 903.63},
+{928.699, 926.598, 928.011, 929.438}, {954.417, 952.35, 953.807, 955.246},
+{992.994, 990.979, 992.502, 993.958}, {1044.43, 1042.48, 1044.1, 1045.57},
+{1095.86, 1093.99, 1095.69, 1097.19}, {1147.3, 1145.49, 1147.28, 1148.81},
+{1198.73, 1197, 1198.87, 1200.42},    {1250.17, 1248.5, 1250.47, 1252.04},
+{1301.61, 1300.01, 1302.06, 1303.66}, {1353.04, 1351.51, 1353.65, 1355.27},
+{1404.48, 1403.02, 1405.25, 1406.89}, {1455.91, 1454.52, 1456.84, 1458.5},
+{1507.35, 1506.03, 1508.43, 1510.12}, {1558.78, 1557.53, 1560.02, 1561.74},
+{1610.22, 1609.04, 1611.62, 1613.35}, {1661.65, 1660.54, 1663.21, 1664.97},
+{1713.09, 1712.05, 1714.8, 1716.59},  {1764.52, 1763.55, 1766.4, 1768.2},
+{1815.96, 1815.06, 1817.99, 1819.82}, {1867.39, 1866.56, 1869.58, 1871.43},
+{1918.83, 1918.07, 1921.17, 1923.05}, {1970.27, 1969.57, 1972.77, 1974.67},
+{2047.42, 2046.83, 2050.16, 2052.09}, {2150.29, 2149.84, 2153.34, 2155.32},
+{2253.16, 2252.85, 2256.53, 2258.56}, {2356.03, 2355.86, 2359.71, 2361.79},
+{2458.9, 2458.87, 2462.9, 2465.02},   {2561.77, 2561.88, 2566.09, 2568.25},
+{2664.64, 2664.89, 2669.27, 2671.49}, {2767.51, 2767.9, 2772.46, 2774.72},
+{2870.38, 2870.91, 2875.64, 2877.95}, {2973.26, 2973.92, 2978.83, 2981.18},
+{3076.13, 3076.93, 3082.02, 3084.42}, {3179, 3179.94, 3185.2, 3187.65},
+{3281.87, 3282.95, 3288.39, 3290.88}, {3384.74, 3385.96, 3391.57, 3394.11},
+{3487.61, 3488.97, 3494.76, 3497.35}, {3590.48, 3591.98, 3597.95, 3600.58},
+{3693.35, 3694.99, 3701.13, 3703.81}, {3796.22, 3798, 3804.32, 3807.04},
+{3899.09, 3901.01, 3907.5, 3910.28},  {4001.96, 4004.02, 4010.69, 4013.51},
+{4104.83, 4107.03, 4113.88, 4116.74}, {4259.14, 4261.54, 4268.65, 4271.59},
+{4464.88, 4467.56, 4475.03, 4478.05}, {4670.62, 4673.58, 4681.4, 4684.52},
+{4876.36, 4879.6, 4887.77, 4890.98},  {5082.11, 5085.62, 5094.14, 5097.45},
+{5287.85, 5291.64, 5300.51, 5303.91}, {5493.59, 5497.66, 5506.88, 5510.38},
+{4996.09, 4997.3, 5008.36, 5013.93},  {5200.82, 5202.38, 5213.76, 5219.46},
+{5405.55, 5407.47, 5419.15, 5424.99}, {5610.27, 5612.56, 5624.55, 5630.52},
+{5815, 5817.65, 5829.95, 5836.05},    {6019.73, 6022.74, 6035.35, 6041.58},
+{6224.46, 6227.83, 6240.75, 6247.11}, {6429.19, 6432.92, 6446.14, 6452.64},
+{6633.91, 6638, 6651.54, 6658.17},    {6838.64, 6843.09, 6856.94, 6863.7},
+{7043.37, 7048.18, 7062.34, 7069.23}, {7248.1, 7253.27, 7267.74, 7274.76},
+{7452.83, 7458.36, 7473.13, 7480.29}, {7657.55, 7663.45, 7678.53, 7685.82},
+{7862.28, 7868.54, 7883.93, 7891.35}, {8067.01, 8073.63, 8089.33, 8096.88},
+{8374.1, 8381.26, 8397.43, 8405.18},  {8783.56, 8791.44, 8808.22, 8816.24},
+{9193.01, 9201.61, 9219.02, 9227.3},  {9602.47, 9611.79, 9629.82, 9638.36},
+{10011.9, 10022, 10040.6, 10049.4},   {10421.4, 10432.1, 10451.4, 10460.5},
+{10830.8, 10842.3, 10862.2, 10871.5}, {11240.3, 11252.5, 11273, 11282.6},
+{11649.7, 11662.7, 11683.8, 11693.7}, {12059.2, 12072.9, 12094.6, 12104.7},
+{12468.7, 12483, 12505.4, 12515.8},   {12878.1, 12893.2, 12916.2, 12926.8},
+{13287.6, 13303.4, 13327, 13337.9},   {13697, 13713.6, 13737.8, 13749},
+{14106.5, 14123.7, 14148.6, 14160},   {14515.9, 14533.9, 14559.4, 14571.1},
+{14925.4, 14944.1, 14970.2, 14982.1}, {15334.9, 15354.3, 15381, 15393.2},
+{15744.3, 15764.5, 15791.8, 15804.3}, {16153.8, 16174.6, 16202.6, 16215.3},
+{16767.9, 16789.9, 16818.8, 16831.9}, {17586.9, 17610.3, 17640.3, 17654},
+{18405.8, 18430.6, 18461.9, 18476.2}, {19224.7, 19251, 19283.5, 19298.3},
+{20043.6, 20071.3, 20105.1, 20120.4}, {20862.5, 20891.7, 20926.7, 20942.5},
+{21681.4, 21712, 21748.3, 21764.6},   {22500.3, 22532.4, 22569.9, 22586.8},
+{23319.2, 23352.7, 23391.5, 23408.9}, {24138.2, 24173.1, 24213.1, 24231},
+{24957.1, 24993.5, 25034.7, 25053.1}, {25776, 25813.8, 25856.3, 25875.2},
+{26594.9, 26634.2, 26677.9, 26697.4}, {27413.8, 27454.5, 27499.5, 27519.5},
+{28232.7, 28274.9, 28321, 28341.6},   {29051.6, 29095.2, 29142.6, 29163.7},
+{29870.5, 29915.6, 29964.2, 29985.8}, {30689.4, 30735.9, 30785.8, 30808},
+{31508.4, 31556.3, 31607.4, 31630.1}, {32327.3, 32376.6, 32429, 32452.2},
+{33146.2, 33197, 33250.6, 33274.3},   {34374.6, 34427.5, 34483, 34507.5},
+{36012.4, 36068.2, 36126.2, 36151.7}, {37650.2, 37709, 37769.4, 37796},
+{39288, 39349.7, 39412.5, 39440.2},   {40925.8, 40990.4, 41055.7, 41084.5},
+{42563.7, 42631.1, 42698.9, 42728.7}, {44201.5, 44271.8, 44342.1, 44372.9},
+{41124.8, 41187, 41205.1, 41213.7},   {42733.7, 42797.8, 42818.1, 42828.2},
+{44342.5, 44408.6, 44431.1, 44442.8}, {45951.4, 46019.4, 46044.1, 46057.3},
+{47560.2, 47630.3, 47657.1, 47671.8}, {49169.1, 49241.1, 49270.1, 49286.4},
+{50777.9, 50851.9, 50883.1, 50900.9}, {52386.8, 52462.7, 52496.1, 52515.4},
+{53995.6, 54073.6, 54109.1, 54130},   {55604.4, 55684.4, 55722.1, 55744.5},
+{57213.3, 57295.2, 57335.1, 57359},   {58822.1, 58906, 58948.1, 58973.6},
+{60431, 60516.8, 60561.1, 60588.1},   {62039.8, 62127.7, 62174.1, 62202.6},
+{63648.7, 63738.5, 63787.1, 63817.1}, {65257.5, 65349.3, 65400.1, 65431.7},
+{67670.8, 67765.5, 67819.7, 67853.5}, {70888.5, 70987.2, 71045.7, 71082.5},
+{74106.2, 74208.8, 74271.7, 74311.6}, {77323.9, 77430.5, 77497.7, 77540.7},
+{80541.6, 80652.1, 80723.7, 80769.7}, {83759.3, 83873.8, 83949.7, 83998.8},
+{86977, 87095.4, 87175.7, 87227.8},   {90194.7, 90317.1, 90401.7, 90456.9},
+{93412.4, 93538.7, 93627.7, 93686},   {96630.1, 96760.4, 96853.7, 96915},
+{99847.8, 99982, 100080, 100144},     {103065, 103204, 103306, 103373},
+{106283, 106425, 106532, 106602},     {109501, 109647, 109758, 109831},
+{112719, 112869, 112984, 113060},     {115936, 116090, 116210, 116289},
+{119154, 119312, 119436, 119518},     {122372, 122534, 122662, 122748},
+{125589, 125755, 125888, 125977},     {128807, 128977, 129114, 129206},
+{133634, 133809, 133953, 134049},     {140069, 140253, 140405, 140507},
+{146504, 146696, 146857, 146965},     {152940, 153139, 153309, 153424},
+{159375, 159582, 159761, 159882},     {165811, 166026, 166213, 166340},
+{172246, 172469, 172665, 172798},     {178681, 178912, 179117, 179256},
+{185117, 185356, 185569, 185714},     {191552, 191799, 192021, 192172},
+{197988, 198242, 198473, 198630},     {204423, 204685, 204925, 205089},
+{210858, 211129, 211377, 211547},     {217294, 217572, 217829, 218005},
+{223729, 224015, 224281, 224463},     {230165, 230459, 230733, 230921},
+{236600, 236902, 237185, 237379},     {243035, 243345, 243637, 243837},
+{249471, 249789, 250089, 250295},     {255906, 256232, 256541, 256754},
+{262342, 262675, 262993, 263212},     {271995, 272340, 272671, 272899},
+{284865, 285227, 285575, 285815},     {297736, 298113, 298479, 298731},
+{310607, 311000, 311383, 311648},     {323478, 323886, 324287, 324564},
+{336349, 336773, 337191, 337480},     {349219, 349660, 350096, 350396}};
+
+
 // plotZDC: use zdc digi output to see the 1n peak
 double QIE10_regular_fC_full[256][18] =
     { { 0.16599,  0.373632, 0.381661, 0.31559,  0.322258, 1.62607,
@@ -835,13 +965,13 @@ void FillChain(TChain &chain, vector<string> &files) {
 // params
 // input: folder of l1ntuples to read from - must contain the branches specified above
 int checkZDCEnergyOccupancy(
-		  char const *input = "/home/data/public/hannah/ZBoutputFiles/") {
+		  char const *input = "/eos/user/h/hbossi/CMSSW_13_2_4/src/Run374730EmptyBx/") {
 
 
     gStyle->SetOptStat(0);
     gStyle->SetOptTitle(0);
 
-    string tag = "ZeroBias";
+    string tag = "EmptyBx";
 
 
     /* read in all files in the input folder */
@@ -857,8 +987,20 @@ int checkZDCEnergyOccupancy(
     TTreeReaderArray<int> z_side(zdcReader, "zside");
     TTreeReaderArray<int> sec(zdcReader, "section");
     TTreeReaderArray<int> ch(zdcReader, "channel");
-    TTreeReaderArray<int> adc(zdcReader, "adcTs4");
+    TTreeReaderArray<int> adc0(zdcReader, "adcTs0"); 
+    TTreeReaderArray<int> adc1(zdcReader, "adcTs1"); 
+    TTreeReaderArray<int> adc2(zdcReader, "adcTs2"); 
+    TTreeReaderArray<int> adc3(zdcReader, "adcTs3"); 
+    TTreeReaderArray<int> adc4(zdcReader, "adcTs4");
+    TTreeReaderArray<int> adc5(zdcReader, "adcTs5");
     TTreeReaderValue<int> N(zdcReader, "n");
+
+    TChain hiEventChain("l1EventTree/L1EventTree"); 
+    FillChain(hiEventChain, files); 
+    TTreeReader eventReader(&hiEventChain);
+    TTreeReaderValue<uint> runNumber(eventReader, "run"); 
+    TTreeReaderValue<ULong64_t> eventNumber(eventReader, "event"); 
+    TTreeReaderValue<uint> lumiSection(eventReader, "lumi"); 
 
     TH1D* hOccupancy = new TH1D("hOccupancy", "ZDC Occupancy", 20, 0, 1);
     TH1D* hOccupancyEM = new TH1D("hOccupancyEM", "ZDC Occupancy EM", 20, 0, 1);
@@ -873,18 +1015,28 @@ int checkZDCEnergyOccupancy(
 
     std::vector<TH1D*> hADCPerChannel;
     std::vector<TH1D*> hEnergyPerChannel;
+    std::vector<TH1D*> hADCvsTSPerChannel;
     for (int i = 0; i < 18; i++) {
         hADCPerChannel.push_back(new TH1D(Form("hADCPerChannel_%d", i), Form("ZDC ADC Per Channel %d", i), 100, 0, 256));
         hEnergyPerChannel.push_back(new TH1D(Form("hEnergyPerChannel_%d", i), Form("ZDC Energy Per Channel %d", i), 100, 0, 1000));
+        hADCvsTSPerChannel.push_back(new TH1D(Form("hADCvsTSPerChannel_%d", i),Form("hADCvsTSPerChannel_%d", i), 6, -0.5, 5.5)); 
     }
 
     Long64_t totalEvents = zdcReader.GetEntries(true);
+    bool filledADChist = false; 
+    int runPlot = -1; 
+    int lumiPlot = -1; 
+    int eventPlot = -1;
+    TH2D* h2ADCvsFC = new TH2D("hADCvsFC","hADCvsFC", 256, 0, 256, 1000, 0, 100000);
     for (Long64_t i = 0; i < totalEvents; i++) {
-        zdcReader.Next();
+        zdcReader.Next(); eventReader.Next(); 
+        if(i == 0) continue;
+        
 
         if (i % 10000 == 0) {
             cout << "Event " << i << endl;
         }
+
         double occupancyEM = 0;
         double occupancyHAD = 0;
         double occupancy = 0;
@@ -907,22 +1059,34 @@ int checkZDCEnergyOccupancy(
             if (sec[j] == 2 && (ch[j] < 1 || ch[j] > 4))
                 continue;
             int idet = (z_side[j] == 1 ? 9 : 0) + (sec[j] == 2 ? 5 : 0) + (ch[j] - 1);
-            hADCPerChannel[idet]->Fill(adc[idet]);
-            double energy = QIE10_regular_fC_full[(UChar_t)(adc[idet])][idet];
+            hADCPerChannel[idet]->Fill(adc2[idet]);
+
+            if(!filledADChist){
+                hADCvsTSPerChannel[idet]->Fill(0.0, adc0[idet]); 
+                hADCvsTSPerChannel[idet]->Fill(1.0, adc1[idet]); 
+                hADCvsTSPerChannel[idet]->Fill(2.0, adc2[idet]); 
+                hADCvsTSPerChannel[idet]->Fill(3.0, adc3[idet]); 
+                hADCvsTSPerChannel[idet]->Fill(4.0, adc4[idet]); 
+                hADCvsTSPerChannel[idet]->Fill(5.0, adc5[idet]); 
+                //std::cout << "adc0 = " << adc0[idet] << " adc 1 = " << adc1[idet] << " adc 2 = " << adc2[idet]
+            }
+            double energy = QIE10_regular_fC_full[(UChar_t)(adc2[idet])][idet];
             hEnergyPerChannel[idet]->Fill(energy);
+            double charge = QIE10_regular_fC[(UChar_t)(adc2[idet])][0];
+            h2ADCvsFC->Fill(adc2[idet], charge);
             //std::cout << "idet: " << idet << " energy: " << energy << std::endl;
-            if (adc[idet] > 0) {
+            if (adc2[idet] > 0) {
                 occupancy = occupancy + 1;
                 energyTotal = energyTotal + energy;
-                adcTotal = adcTotal + adc[idet];
+                adcTotal = adcTotal + adc2[idet];
                 if(sec[j] == 1) {
                     occupancyEM = occupancyEM + 1;
                     energyEM = energyEM + energy;
-                    adcEM = adcEM + adc[idet];
+                    adcEM = adcEM + adc2[idet];
                 } else {
                     occupancyHAD = occupancyHAD + 1;
                     energyHAD = energyHAD + energy;
-                    adcHAD = adcHAD + adc[idet];
+                    adcHAD = adcHAD + adc2[idet];
                 }
             }
         }// end the loop over the number of hits
@@ -960,11 +1124,20 @@ int checkZDCEnergyOccupancy(
         hADCEM->Fill(adcEM);
         hADCHAD->Fill(adcHAD);
 
+        if(!filledADChist){
+          runPlot   = *runNumber; 
+          lumiPlot  = *lumiSection; 
+          eventPlot = *eventNumber; 
+          filledADChist = true; 
+        }
+
+
+
     } // end loop over the number of events
 
 
      // now start the plotting
-    TLatex* cms = new TLatex(0.10,0.92,"#bf{CMS} #it{Internal} Zero Bias PbPb 2023 (5.36 TeV)");
+    TLatex* cms = new TLatex(0.10,0.92,"#bf{CMS} #it{Internal} Empty Bx PbPb 2023 (5.36 TeV)");
     cms->SetNDC();
     cms->SetTextSize(0.05);
     cms->SetTextFont(42);
@@ -1002,7 +1175,7 @@ int checkZDCEnergyOccupancy(
     leg->Draw();
     cms->Draw();
 
-    cOccupancy->SaveAs("ZDCOccupancy.pdf");
+    cOccupancy->SaveAs(Form("ZDCOccupancy_%s.pdf", tag.c_str()));
 
     // -----------------------------------
     // plot the energy
@@ -1037,7 +1210,7 @@ int checkZDCEnergyOccupancy(
     legEnergy->Draw();
     cms->Draw();
 
-    cEnergy->SaveAs("ZDCEnergy.pdf");
+    cEnergy->SaveAs(Form("ZDCEnergy_%s.pdf", tag.c_str()));
 
      // -----------------------------------
     // plot the mean adc counts
@@ -1072,7 +1245,7 @@ int checkZDCEnergyOccupancy(
     legADC0->Draw();
     cms->Draw();
 
-    cADC0->SaveAs("ZDCADC.pdf");
+    cADC0->SaveAs(Form("ZDCADC_%s.pdf", tag.c_str()));
 
 
 
@@ -1082,6 +1255,7 @@ int checkZDCEnergyOccupancy(
      // -----------------------------------
     int colors[20] = {kRed+2, kRed-4, kOrange+7, kOrange, kYellow-4, kSpring+10, kSpring, kGreen-3, kGreen+3, kTeal-7, kTeal, kAzure+10, kAzure-4, kBlue+2, kViolet+8, kViolet-1, kMagenta+1, kMagenta-4, kPink+7, kPink-4};
     std::string names[20] = {"Minus EM1", "Minus EM2", "Minus EM3", "Minus EM4", "Minus EM5", "Minus HAD1", "Minus HAD2", "Minus HAD3", "Minus HAD4", "Plus EM1", "Plus EM2", "Plus EM3", "Plus EM4", "Plus EM5", "Plus HAD1", "Plus HAD2", "Plus HAD3", "Plus HAD4"};
+    std::string namesNoSpace[20] = {"MinusEM1", "MinusEM2", "MinusEM3", "MinusEM4", "MinusEM5", "MinusHAD1", "MinusHAD2", "MinusHAD3", "MinusHAD4", "PlusEM1", "PlusEM2", "PlusEM3", "PlusEM4", "PlusEM5", "PlusHAD1", "PlusHAD2", "PlusHAD3", "PlusHAD4"};
     TCanvas* cADC = new TCanvas("cADC", "cADC", 800, 600);
     cADC->SetLogy();
     cADC->SetRightMargin(0.05);
@@ -1110,7 +1284,7 @@ int checkZDCEnergyOccupancy(
     legADC->Draw();
     cms->Draw();
 
-    cADC->SaveAs("ZDCADCPerChannel.pdf");
+    cADC->SaveAs(Form("ZDCADCPerChannel_%s.pdf", tag.c_str()));
 
     // -----------------------------------
     // plot the Energy per channel
@@ -1142,7 +1316,45 @@ int checkZDCEnergyOccupancy(
     legEnergyPerChannel->SetTextSize(0.04);
     legEnergyPerChannel->Draw();
     cms->Draw();
-    cEnergyPerChannel->SaveAs("ZDCEnergyPerChannel.pdf");
+    cEnergyPerChannel->SaveAs(Form("ZDCEnergyPerChannel_%s.pdf", tag.c_str()));
+
+
+    // -----------------------------------
+    // plot the adc vs. time slice
+    // -----------------------------------
+    for(int i  = 0; i < 18; i++){
+      TCanvas* canvasADCvsTS = new TCanvas("canvasADCvsTS", "canvasADCvsTS", 800, 600); 
+      hADCvsTSPerChannel[i]->GetYaxis()->SetTitle("ADC Values"); 
+      hADCvsTSPerChannel[i]->GetXaxis()->SetTitle("TS"); 
+      TLatex* detId = new TLatex(0.16,0.8,Form("%s", names[i].c_str()));
+      detId->SetNDC();
+      detId->SetTextSize(0.035);
+      detId->SetTextFont(42);
+      hADCvsTSPerChannel[i]->SetFillColor(kBlack);
+      hADCvsTSPerChannel[i]->SetLineColor(kBlack);
+      hADCvsTSPerChannel[i]->SetFillStyle(3018);
+      hADCvsTSPerChannel[i]->Draw("hist"); 
+      detId->Draw(); 
+      cms->Draw(); 
+      canvasADCvsTS->SaveAs(Form("ADCvsTS_%s_Run%d_Lumi%d_Event%d.pdf", namesNoSpace[i].c_str(), runPlot, lumiPlot, eventPlot));
+      
+
+    }
+
+    // -----------------------------------
+    // plot the Energy per channel
+    // -----------------------------------
+    TCanvas* cADCvsCharge = new TCanvas("cADCvsCharge", "cADCvsCharge", 800, 600);
+    cADCvsCharge->cd();
+    cADCvsCharge->SetLeftMargin(0.12);
+    cADCvsCharge->SetRightMargin(0.05);
+    h2ADCvsFC->SetMarkerColor(kBlack);
+    h2ADCvsFC->SetMarkerStyle(20);
+    h2ADCvsFC->GetXaxis()->SetTitle("ADC");
+    h2ADCvsFC->GetYaxis()->SetTitle("Charge (fC)");
+    h2ADCvsFC->Draw("same");
+
+    cADCvsCharge->SaveAs("ADCvsFC.pdf");
 
 
     return 1;

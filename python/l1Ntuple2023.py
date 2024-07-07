@@ -55,14 +55,14 @@ process.es_ascii = cms.ESSource(
 
 # To change the number of events, change this part
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(10000),
+    input = cms.untracked.int32(100),
     output = cms.optional.untracked.allowed(cms.int32,cms.PSet)
 )
 
 # Input source
 
 # in case of dat files - read it like this
-filedir = '/eos/cms/store/t0streamer/Data/PhysicsHIPhysicsRawPrime14/000/374/200'
+filedir = '/eos/cms/store/t0streamer/Data/PhysicsHIPhysicsRawPrime14/000/375/820'
 print(filedir)
 infile    = cms.untracked.vstring()
 for f in reversed(os.listdir(filedir)):
