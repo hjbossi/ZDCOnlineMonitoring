@@ -28,7 +28,7 @@ void RunThreeAnalysis()
     }
     zdcchain->AddFriend(hichain);
 
-    //  Some variables are arrays of 56 because of how these variables are stored in the root files
+    //  Some variables are arrays of 56 because of how the data for these variables are stored in the root files
     int hibin;
     float sumPlus;
     float sumMinus;
@@ -59,9 +59,13 @@ void RunThreeAnalysis()
     float EM_sig[5];
     float HAD_sig[4];
 
-    float ZDC;
-    float pHAD_sigtot;
-    float pEM_sigtot;
+    // x position variables for rpd and EM
+    float xrpd[5];
+    float yrpd[5];
+    float xem;
+
+    float rpd_total;
+    float em_total;
 
     // Declaration of variables in the root files, second argument is the variable we use for them in the code
     zdcchain->SetBranchAddress("chargefCTs0",&TS0);
@@ -91,36 +95,21 @@ void RunThreeAnalysis()
 
     for (int n = 0; n < 16; n++)
     {
-        RPD_TSDist[n] = new TH1F
-        (
-            Form("h_block%d_rpdtsdist", n), // histogram name
-            Form("Run 374810 TS Dist All Centrality RPD+ Block %d", n), // title
-            6, 0, 6
-        );
+        RPD_TSDist[n] = new TH1F(Form("h_block%d_rpdtsdist", n), Form("Run 374810 TS Dist All Centrality RPD+ Block %d", n), 6, 0, 6);
         RPD_TSDist[n]->SetXTitle("Time Slice");
         RPD_TSDist[n]->SetYTitle("Total Charge (fC)");
     }
 
     for (int n = 0; n < 16; n++)
     {
-        RPD_TSRatio[n] = new TH1F
-        (
-            Form("h_block%d_rpdtsratio", n), // histogram name
-            Form("Run 374810 Ratio TS2 : TS3 All Centrality RPD+ Block %d", n), // title
-            6, 0, 6
-        );
+        RPD_TSRatio[n] = new TH1F(Form("h_block%d_rpdtsratio", n), Form("Run 374810 Ratio TS2 : TS3 All Centrality RPD+ Block %d", n), 100, 0, 10);
         RPD_TSRatio[n]->SetXTitle("TS2 : TS3");
         RPD_TSRatio[n]->SetYTitle("Counts");
     }
 
     for (int n = 0; n < 16; n++)
     {
-        RPD_fCDist[n] = new TH1F
-        (
-            Form("h_block%d_rpdfCDist", n), // histogram name
-            Form("Run 374810 fC Dist All Centrality RPD+ Block %d", n), // title
-            6, 0, 6
-        );
+        RPD_fCDist[n] = new TH1F(Form("h_block%d_rpdfCDist", n), Form("Run 374810 fC Dist All Centrality RPD+ Block %d", n), 100, 0, 100000);
         RPD_fCDist[n]->SetXTitle("TS2 (fC)");
         RPD_fCDist[n]->SetYTitle("Counts");
     }
@@ -133,36 +122,21 @@ void RunThreeAnalysis()
 
     for (int n = 0; n < 5; n++)
     {
-        EM_TSDist[n] = new TH1F
-        (
-            Form("h_block%d_emtsdist", n), // histogram name
-            Form("Run 374810 TS Dist All Centrality EM+ Channel %d", n), // title
-            6, 0, 6
-        );
+        EM_TSDist[n] = new TH1F(Form("h_block%d_emtsdist", n), Form("Run 374810 TS Dist All Centrality EM+ Channel %d", n), 6, 0, 6);
         EM_TSDist[n]->SetXTitle("Time Slice");
         EM_TSDist[n]->SetYTitle("Total Charge (fC)");
     }
 
     for (int n = 0; n < 5; n++)
     {
-        EM_TSRatio[n] = new TH1F
-        (
-            Form("h_block%d_emtsratio", n), // histogram name
-            Form("Run 374810 Ratio TS2 : TS3 All Centrality EM+ Block %d", n), // title
-            100, 0, 10
-        );
+        EM_TSRatio[n] = new TH1F(Form("h_block%d_emtsratio", n), Form("Run 374810 Ratio TS2 : TS3 All Centrality EM+ Block %d", n),100, 0, 10);
         EM_TSRatio[n]->SetXTitle("TS2 : TS3");
         EM_TSRatio[n]->SetYTitle("Counts");
     }
 
     for (int n = 0; n < 5; n++)
     {
-        EM_fCDist[n] = new TH1F
-        (
-            Form("h_block%d_emfCDist", n), // histogram name
-            Form("Run 374810 fC Dist All Centrality EM+ Block %d", n), // title
-            100, 0, 200000
-        );
+        EM_fCDist[n] = new TH1F(Form("h_block%d_emfCDist", n), Form("Run 374810 fC Dist All Centrality EM+ Block %d", n),100, 0, 200000);
         EM_fCDist[n]->SetXTitle("TS2 (fC)");
         EM_fCDist[n]->SetYTitle("Counts");
     }
@@ -176,39 +150,33 @@ void RunThreeAnalysis()
 
     for (int n = 0; n < 4; n++)
     {
-        HAD_TSDist[n] = new TH1F
-        (
-            Form("h_block%d_hadtsdist", n), // histogram name
-            Form("Run 374810 TS Dist All Centrality HAD+ Channel %d", n), // title
-            6, 0, 6
-        );
+        HAD_TSDist[n] = new TH1F(Form("h_block%d_hadtsdist", n),Form("Run 374810 TS Dist All Centrality HAD+ Channel %d", n),6, 0, 6);
         HAD_TSDist[n]->SetXTitle("Time Slice");
         HAD_TSDist[n]->SetYTitle("Total Charge (fC)");
     }
 
     for (int n = 0; n < 4; n++)
     {
-        HAD_TSRatio[n] = new TH1F
-        (
-            Form("h_block%d_hadtsratio", n), // histogram name
-            Form("Run 374810 Ratio TS2 : TS3 All Centrality HAD+ Block %d", n), // title
-            100, 0, 10
-        );
+        HAD_TSRatio[n] = new TH1F(Form("h_block%d_hadtsratio", n), Form("Run 374810 Ratio TS2 : TS3 All Centrality HAD+ Block %d", n), 100, 0, 10);
         HAD_TSRatio[n]->SetXTitle("TS2 : TS3");
         HAD_TSRatio[n]->SetYTitle("Counts");
     }
 
     for (int n = 0; n < 4; n++)
     {
-        HAD_fCDist[n] = new TH1F
-        (
-            Form("h_block%d_hadfCDist", n), // histogram name
-            Form("Run 374810 fC Dist All Centrality HAD+ Block %d", n), // title
-            100, 0, 150000
-        );
+        HAD_fCDist[n] = new TH1F(Form("h_block%d_hadfCDist", n), Form("Run 374810 fC Dist All Centrality HAD+ Block %d", n), 100, 0, 150000);
         HAD_fCDist[n]->SetXTitle("TS2 (fC)");
         HAD_fCDist[n]->SetYTitle("Counts");
     }
+    
+    // X Position plot for RPD
+    TH1F *RPDx_position = new TH1F("RPD X Position","Run 374810 RPD X Position (cm) All Centrality",200,-4,4);
+
+    // 2D Position plot for RPD 
+    TH2F *RPD_COM = new TH2F("RPD Position","Run 374810 RPD Position (cm) All Centrality",200,-4,4,200,-4,4);
+
+    // EM X Position plot
+    TH1F *EM_COM = new TH1F("EM Position","Run 374810 EM Position (cm) All Centrality",200,-5,5);
 
     Int_t NumberEvents = zdcchain->GetEntries();
     cout << "Total Number of Events in Run 374810 is " << NumberEvents << endl;
@@ -221,6 +189,8 @@ void RunThreeAnalysis()
         {
             cout << "Event " << i << " has been processed" << endl;
         }
+    if (hibin >= 0 && hibin <= 200)
+    {
 
         for (int n = 0; n < 56; n++)
         {
@@ -527,6 +497,29 @@ void RunThreeAnalysis()
                     RPD_sig[1] = TS2[n];
                     RPD_fCDist[1]->Fill(RPD_sig[1]);
                 }
+                xrpd[0] = RPD_sig[0] + RPD_sig[4] + RPD_sig[8] + RPD_sig[12];
+                xrpd[1] = RPD_sig[1] + RPD_sig[5] + RPD_sig[9] + RPD_sig[13];
+                xrpd[2] = RPD_sig[2] + RPD_sig[6] + RPD_sig[10] + RPD_sig[14];
+                xrpd[3] = RPD_sig[3] + RPD_sig[7] + RPD_sig[11] + RPD_sig[15];
+
+                // Total position for rpd, per event, the coefficients are weighting each column by its position in the rpd
+                // The coordinate system has the center of the rpd at 0,0
+                // The middle of the columns to the left and right are at -1 and 1
+                // The middle of the columns to the far left and far right are at -3 and 3
+                // We are saying that the signal comes from within the middle of each block / column of blocks
+                
+
+                yrpd[0] = RPD_sig[0] + RPD_sig[1] + RPD_sig[2] + RPD_sig[3];
+                yrpd[1] = RPD_sig[4] + RPD_sig[5] + RPD_sig[6] + RPD_sig[7];
+                yrpd[2] = RPD_sig[8] + RPD_sig[9] + RPD_sig[10] + RPD_sig[11];
+                yrpd[3] = RPD_sig[12] + RPD_sig[13] + RPD_sig[14] + RPD_sig[15];
+
+                rpd_total = xrpd[0] + xrpd[1] + xrpd[2] + xrpd[3];
+
+                xrpd[4] = ((-3 * xrpd[0]) + (-1 * xrpd[1]) + (1 * xrpd[2]) + (3 * xrpd[3])) / rpd_total;
+
+                yrpd[4] = ((3 * yrpd[0]) + (1 * yrpd[1]) + (-1 * yrpd[2]) + (-3 * yrpd[3])) / rpd_total;
+
             } // end rpd
             if (zside[n] == 1 & section[n] == 1)
             {
@@ -609,6 +602,13 @@ void RunThreeAnalysis()
                     EM_sig[4] = TS2[n];
                     EM_fCDist[4]->Fill(EM_sig[4]);
                 }
+
+                //  The first set of coefficients are relative gains for the EM, since not every PMT for each channel has the same gain 
+                //  The gains are relative to channel 3, thats why the relative gain for channel 3 is 1. 
+                //  The second set of coefficients are position weights. They are the middle of each section / block in the EM
+                //  The middle of channel 3 is x = 0, and the middle of the EM sections on either side increase / decrease by 1.8 cm
+                em_total = (0.6 * EM_sig[0]) + (0.89 * EM_sig[1]) + (1 * EM_sig[2]) + (1.29 * EM_sig[3]) + (0.57 * EM_sig[4]);
+                xem = ((0.6 * -3.6 * EM_sig[0]) + (0.89 * -1.8 * EM_sig[1]) + (1* 0 * EM_sig[2]) + (1.29 * 1.8 * EM_sig[3]) + (0.57 * 3.6 * EM_sig[4])) / em_total;
             } // end of EM
             if (zside[n] == 1 && section[n] == 2)
             {
@@ -678,8 +678,15 @@ void RunThreeAnalysis()
                 
             } // end HAD
         } // end channel loop
+        
+            RPDx_position->Fill(xrpd[4]);
+            RPD_COM->Fill(xrpd[4],yrpd[4]);
+            EM_COM->Fill(xem);
+        
+    } // end hibin (centrality) 0 - 200 is all centrality, 0 - 20 is 0 to 10% centrality
     } // end event loop
 
+    /*
     TCanvas *c1 = new TCanvas();
     c1->Divide(4,4);
     for (int n = 0; n < 16; n++)
@@ -751,4 +758,19 @@ void RunThreeAnalysis()
         c9->cd(n+1);
         HAD_fCDist[n]->Draw();
     }
+    */
+
+    TCanvas *c10 = new TCanvas();
+    c10->cd(1);
+    RPDx_position->Draw();
+
+    TCanvas *c11 = new TCanvas();
+    c11->cd(1);
+    RPD_COM->Draw("colz");
+
+    TCanvas *c12 = new TCanvas();
+    c12->cd(1);
+    EM_COM->Draw();
+
+
 }
