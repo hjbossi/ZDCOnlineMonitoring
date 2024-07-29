@@ -13,4 +13,13 @@ To run this file emap_2023_newZDC.txt, QWZDC2018Producer_cfi.py, ZDC2018Pedestal
 This directory contains plotting macros used for processing the L1Ntuples produced by the code in the python directory. The two main plotting functionalities include plotting the emulator vs. unpacker comparisons as well as the per digi plots. 
 
 ## LUT Conversion
-The code in this directory is useful for converting the LUT provided by HCal experts (Michael Krohn) to the format used by the L1T ZDC emulation. Note that this conversion code would quickly become obsolete once [PR # 42818](https://github.com/cms-sw/cmssw/pull/42818) is merged. Note that for OOTPU subtraction the idea is to create two different LUTs and then use both of these in the code. Full instructions are included in the [L1 ZDC Emualtor Twiki](https://twiki.cern.ch/twiki/bin/view/CMS/ZDCL1TEmulator). The text files for the most recent versions of the LUTs (v4) are included in the file. 
+The code in this directory is useful for converting the LUT provided by HCal experts (Michael Krohn) to the format used by the L1T ZDC emulation. Note that this conversion code would quickly become obsolete once [PR # 42818](https://github.com/cms-sw/cmssw/pull/42818) is merged. Note that for OOTPU subtraction the idea is to create two different LUTs and then use both of these in the code. Full instructions are included in the [L1 ZDC Emualtor Twiki](https://twiki.cern.ch/twiki/bin/view/CMS/ZDCL1TEmulator). The text files for the most recent versions of the LUTs (v4) are included in the file.
+
+## Calibration
+This directory contains macros used for the calibration of the L1Ntuples. The input filename should be written in the macro (line 27). Before running the code, the following commands should be ran:
+```
+cd /afs/cern.ch/user/m/mcsanad/public/CMSSW_13_2_4/src/HeavyIonsAnalysis/ZDCAnalysis/python
+cmsenv
+cd -
+```
+The output root file can be plotted using the Plot_analyze.C macro.
