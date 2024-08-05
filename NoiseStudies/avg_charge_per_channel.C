@@ -1,5 +1,5 @@
-// adcDistributions.C
-// This macro makes ADC distributions for Time Slice 0 and 1 for all ZDC+ and ZDC- channels
+// avg_charge_per_channel.C
+// This macro makes scatter plots showing the average charge (avg TS0 and avg TS1 charge) for each channel in ZDC+ and ZDC-
 // The first line reads in HiForest output
 
 #include <iostream>
@@ -40,10 +40,11 @@ void drawText(float xp, float yp, const char *text, int textColor=kBlack, double
   tex->Draw();
 }
 
-void adcDistributions()
+
+void avg_charge_per_channel()
 {
   // Read in file
-  TFile *file = new TFile("../HiForestMiniAOD_10000.root");
+  TFile *file = new TFile("../../../HiForestMiniAOD_10000.root");
   TTree *zdcTree = (TTree*)file->Get("zdcanalyzer/zdcdigi");
   TTree *hltAnalysisTree = (TTree*)file->Get("hltanalysis/HltTree");
   float zdcEnt = zdcTree->GetEntries();
@@ -63,7 +64,7 @@ void adcDistributions()
   zdcTree->SetBranchAddress("adcTs0", &adc_0);
   zdcTree->SetBranchAddress("adcTs1", &adc_1);
 
-  // Define hists
+  // hists
   int adcMax=260;
   const int zdc_channelNumber=28;
   vector<TH1F*> h_zdcPlus_adc0, h_zdcNeg_adc0;
@@ -73,7 +74,7 @@ void adcDistributions()
   h_zdcPlus_adc1.resize(zdc_channelNumber);
   h_zdcNeg_adc1.resize(zdc_channelNumber);
 
-  // Label hists
+  // label the hists
   for (int i=0; i<zdc_channelNumber; i++)
     {
 
@@ -150,75 +151,93 @@ void adcDistributions()
       
     } // end evt loop
 
- 
 
+
+  
+  // find the mean charge for TS0 and TS1 for ZDC+ and ZDC-
   float mean_zdc0_Neg[28]={0}, mean_zdc0_Plus[28]={0}, mean_zdc1_Neg[28]={0}, mean_zdc1_Plus[28]={0};
   
-
-  // Plotting
-  TCanvas *c0Plus[zdc_channelNumber], *c0Neg[zdc_channelNumber], *c1Plus[zdc_channelNumber], *c1Neg[zdc_channelNumber];
-  
   for (int i=0; i<zdc_channelNumber; i++)
-    {
-      // Neg TS0
-      c0Neg[i] = new TCanvas(Form("c0Neg_%d",i), Form("c0Neg_%d",i),850,850);
-      c0Neg[i]->SetLogy();
+    {      
       mean_zdc0_Neg[i]=h_zdcNeg_adc0.at(i)->GetMean();
-      h_zdcNeg_adc0.at(i)->GetXaxis()->SetTitle("ADC Value, TS0");
-      h_zdcNeg_adc0.at(i)->GetYaxis()->SetTitle("Counts");
-      h_zdcNeg_adc0.at(i)->Draw();
-      drawText(0.15,0.85,"ZDC-",kBlack,28);
-      drawText(0.15,0.8,Form("mean=%.2f",mean_zdc0_Neg[i]),kBlack,28);
-
-      // Plus TS0
-      c0Plus[i] = new TCanvas(Form("c0Plus_%d",i), Form("c0Plus_%d",i),850,850);
-      c0Plus[i]->SetLogy();
       mean_zdc0_Plus[i]=h_zdcPlus_adc0.at(i)->GetMean();
-      h_zdcPlus_adc0.at(i)->GetXaxis()->SetTitle("ADC Value, TS0");
-      h_zdcPlus_adc0.at(i)->GetYaxis()->SetTitle("Counts");
-      h_zdcPlus_adc0.at(i)->Draw();
-      drawText(0.15,0.85,"ZDC+",kBlack,28);
-      drawText(0.15,0.8,Form("mean=%.2f",mean_zdc0_Plus[i]),kBlack,28);
-
-      // Neg TS1
-      c1Neg[i] = new TCanvas(Form("c1Neg_%d",i), Form("c1Neg_%d",i),850,850);
-      c1Neg[i]->SetLogy();
       mean_zdc1_Neg[i]=h_zdcNeg_adc1.at(i)->GetMean();
-      h_zdcNeg_adc1.at(i)->GetXaxis()->SetTitle("ADC Value, TS1");
-      h_zdcNeg_adc1.at(i)->GetYaxis()->SetTitle("Counts");
-      h_zdcNeg_adc1.at(i)->Draw();
-      drawText(0.15,0.85,"ZDC-",kBlack,28);
-      drawText(0.15,0.8,Form("mean=%.2f",mean_zdc1_Neg[i]),kBlack,28);
-
-      // Plus TS1
-      c1Plus[i] = new TCanvas(Form("c1Plus_%d",i), Form("c1Plus_%d",i),850,850);
-      c1Plus[i]->SetLogy();
-      mean_zdc1_Plus[i]=h_zdcPlus_adc1.at(i)->GetMean();
-      h_zdcPlus_adc1.at(i)->GetXaxis()->SetTitle("ADC Value, TS1");
-      h_zdcPlus_adc1.at(i)->GetYaxis()->SetTitle("Counts");
-      h_zdcPlus_adc1.at(i)->Draw();
-      drawText(0.15,0.85,"ZDC+",kBlack,28);
-      drawText(0.15,0.8,Form("mean=%.2f",mean_zdc1_Plus[i]),kBlack,28);
+      mean_zdc1_Plus[i]=h_zdcPlus_adc1.at(i)->GetMean();    
     }
 
+
+
+  // scatter plot TS0 channels, Plus and Minus
+  TCanvas *cScatter_ts0 = new TCanvas("cScatter_ts0", " ", 800, 600);
+  const int nPoints = 28;
+  float xNeg_ts0[nPoints]={0}, xPos_ts0[nPoints]={0};
+  float yNeg_ts0[nPoints]={0}, yPos_ts0[nPoints]={0};
   
-  // Print ZDC+ and ZDC-, ADC TS0 and ADCTS1 distrubtions to 4 seperate PDFs
-  c0Neg[0]->Print("zdcNeg_adc0.pdf(","pdf");
-  c0Plus[0]->Print("zdcPlus_adc0.pdf(","pdf");
-  c1Neg[0]->Print("zdcNeg_adc1.pdf(","pdf");
-  c1Plus[0]->Print("zdcPlus_adc1.pdf(","pdf");
-  for (int j=1; j<(zdc_channelNumber-1); j++)
+  for (int i=0; i<nPoints; i++)
     {
-      c0Neg[j]->Print("zdcNeg_adc0.pdf","pdf");
-      c0Plus[j]->Print("zdcPlus_adc0.pdf","pdf");
-      c1Neg[j]->Print("zdcNeg_adc1.pdf","pdf");
-      c1Plus[j]->Print("zdcPlus_adc1.pdf","pdf");
+      xNeg_ts0[i] = (i+.95);
+      yNeg_ts0[i] = mean_zdc0_Neg[i];
+      xPos_ts0[i] = (i+1.05);
+      yPos_ts0[i] = mean_zdc0_Plus[i];          
     }
-  c0Neg[27]->Print("zdcNeg_adc0.pdf)","pdf");
-  c0Plus[27]->Print("zdcPlus_adc0.pdf)","pdf");
-  c1Neg[27]->Print("zdcNeg_adc1.pdf)","pdf");
-  c1Plus[27]->Print("zdcPlus_adc1.pdf)","pdf");
 
+  TGraph *grNeg_ts0 = new TGraph(nPoints, xNeg_ts0, yNeg_ts0);
+  TGraph *grPos_ts0 = new TGraph(nPoints, xPos_ts0, yPos_ts0);
+
+  grNeg_ts0->SetMarkerStyle(kFullDotLarge);
+  grNeg_ts0->SetMarkerColor(kRed);
+  grNeg_ts0->SetMarkerSize(2);
+  grPos_ts0->SetMarkerStyle(kFullDotLarge);
+  grPos_ts0->SetMarkerSize(2);
+  grPos_ts0->GetYaxis()->SetRangeUser(0,100);
+  grPos_ts0->SetTitle(";Channel [0-27];Mean ADC Value TS0");
+  grPos_ts0->Draw("AP");
+  grNeg_ts0->Draw("P SAME");
+
+  TLegend *legend = new TLegend(0.75, 0.75, 0.85, 0.85);
+  legend->AddEntry(grNeg_ts0, "ZDC-", "p");
+  legend->AddEntry(grPos_ts0, "ZDC+", "p");
+  legend->SetBorderSize(0);
+  legend->Draw();
+
+  cScatter_ts0->SaveAs("scatterPlot_ts0.png");
+
+
+
+  // scatter plot TS1 channels, Plus and Minus
+  TCanvas *cScatter_ts1 = new TCanvas("cScatter_ts1", " ", 800, 600);
+  float xNeg_ts1[nPoints]={0}, xPos_ts1[nPoints]={0};
+  float yNeg_ts1[nPoints]={0}, yPos_ts1[nPoints]={0};
+  
+  for (int i=0; i<nPoints; i++)
+    {
+      xNeg_ts1[i] = (i+.95);
+      yNeg_ts1[i] = mean_zdc1_Neg[i];
+      xPos_ts1[i] = (i+1.05);
+      yPos_ts1[i] = mean_zdc1_Plus[i];          
+    }
+
+  TGraph *grNeg_ts1 = new TGraph(nPoints, xNeg_ts1, yNeg_ts1);
+  TGraph *grPos_ts1 = new TGraph(nPoints, xPos_ts1, yPos_ts1);
+
+  grNeg_ts1->SetMarkerStyle(kFullDotLarge);
+  grNeg_ts1->SetMarkerColor(kRed);
+  grNeg_ts1->SetMarkerSize(2);
+  grPos_ts1->SetMarkerStyle(kFullDotLarge);
+  grPos_ts1->SetMarkerSize(2);
+  grPos_ts1->GetYaxis()->SetRangeUser(0,100);
+  grPos_ts1->SetTitle(";Channel [0-27];Mean ADC Value TS1");
+  grPos_ts1->Draw("AP");
+  grNeg_ts1->Draw("P SAME");
+
+  TLegend *legend1 = new TLegend(0.75, 0.75, 0.85, 0.85);
+  legend1->AddEntry(grNeg_ts1, "ZDC-", "p");
+  legend1->AddEntry(grPos_ts1, "ZDC+", "p");
+  legend1->SetBorderSize(0);
+  legend1->Draw();
+
+  cScatter_ts1->SaveAs("scatterPlot_ts1.png");
+  
   
   
 }
