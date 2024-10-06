@@ -32,6 +32,20 @@ private:
 	bool		bTree_;
 	std::map<uint32_t, TH2D*>	hADC;
 	std::map<uint32_t, TH2D*>	hfC;
+//Saray: Addig plots for each TS
+
+	std::map<uint32_t, TH2D*>       hfC1TS;
+	std::map<uint32_t, TH2D*>       hfC2TS;
+	std::map<uint32_t, TH2D*>       hfC3TS;
+	std::map<uint32_t, TH2D*>       hfC4TS;
+	std::map<uint32_t, TH2D*>       hfC5TS;
+	std::map<uint32_t, TH2D*>       hfC6TS;	
+	std::map<uint32_t, TH2D*>       hfC7TS;
+	std::map<uint32_t, TH2D*>       hfC8TS;
+	std::map<uint32_t, TH2D*>       hfC9TS;
+	std::map<uint32_t, TH2D*>       hfC10TS;
+
+
 
 	std::map<uint32_t, TH1D*>	hHigh;
 	std::map<uint32_t, TH1D*>	hLow;
@@ -98,6 +112,8 @@ QWZDC2018Analyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 	using namespace edm;
 	Handle<std::vector<double> > hadc;
 	Handle<std::vector<double> > hfc;
+	//Handle<std::vector<double> > hfc1TS;
+
 	Handle<std::vector<double> > hDid;
 	Handle<std::vector<double> > hCid;
 	Handle<std::vector<double> > hChargeHigh;
@@ -114,21 +130,49 @@ QWZDC2018Analyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 
 	int sz = hadc->size();
 
-	//int NS_ = sz / hDid->size();
-	int NS_ = 6;
+	int NS_ = sz / hDid->size();
 	if ( firstEvent_ ) {
 		firstEvent_ = false;
 
 		edm::Service<TFileService> fs;
 		auto fADC = fs->mkdir("ADC");
 		auto ffC = fs->mkdir("fC");
+
+		auto ffC1TS = fs->mkdir("fC1TS");
+		auto ffC2TS = fs->mkdir("fC2TS");
+		auto ffC3TS = fs->mkdir("fC3TS");
+		auto ffC4TS = fs->mkdir("fC4TS");
+		auto ffC5TS = fs->mkdir("fC5TS");
+		auto ffC6TS = fs->mkdir("fC6TS");
+		auto ffC7TS = fs->mkdir("fC7TS");
+		auto ffC8TS = fs->mkdir("fC8TS");
+		auto ffC9TS = fs->mkdir("fC9TS");
+		auto ffC10TS = fs->mkdir("fC10TS");
+
+
 		auto fHigh = fs->mkdir("HighGain");
 		auto fLow  = fs->mkdir("LowGain");
 		auto fSum  = fs->mkdir("SumGain");
 		for ( auto it = hDid->begin(); it != hDid->end(); it++ ) {
 			if ( cname.find( (uint32_t)(*it) ) != cname.end() ) {
-				hADC[uint32_t(*it)] = fADC.make<TH2D>(cname[(uint32_t)(*it)].c_str(), (cname[(uint32_t)(*it)]+";TS;ADC").c_str(), 6, 0, 6, 256, 0, 256);
-				hfC[uint32_t(*it)]  = ffC. make<TH2D>(cname[(uint32_t)(*it)].c_str(), (cname[(uint32_t)(*it)]+";TS;fC").c_str(), 6, 0, 6, 3500, 0, 35000);
+				hADC[uint32_t(*it)] = fADC.make<TH2D>(cname[(uint32_t)(*it)].c_str(), (cname[(uint32_t)(*it)]+";TS;ADC").c_str(), 10, 0, 10, 256, 0, 256);
+				hfC[uint32_t(*it)]  = ffC. make<TH2D>(cname[(uint32_t)(*it)].c_str(), (cname[(uint32_t)(*it)]+";TS;fC").c_str(), 10, 0, 10, 3500, 0, 35000);
+//Saray: Addig plots for each TS
+
+				hfC1TS[uint32_t(*it)]  = ffC1TS. make<TH2D>(cname[(uint32_t)(*it)].c_str(), (cname[(uint32_t)(*it)]+";TS;fC").c_str(), 1, 0, 1, 3500, 0, 35000);
+				hfC2TS[uint32_t(*it)]  = ffC2TS. make<TH2D>(cname[(uint32_t)(*it)].c_str(), (cname[(uint32_t)(*it)]+";TS;fC").c_str(), 1, 1, 2, 3500, 0, 35000);
+				hfC3TS[uint32_t(*it)]  = ffC3TS. make<TH2D>(cname[(uint32_t)(*it)].c_str(), (cname[(uint32_t)(*it)]+";TS;fC").c_str(), 1, 2, 3, 3500, 0, 35000);
+				hfC4TS[uint32_t(*it)]  = ffC4TS. make<TH2D>(cname[(uint32_t)(*it)].c_str(), (cname[(uint32_t)(*it)]+";TS;fC").c_str(), 1, 3, 4, 3500, 0, 35000);
+				hfC5TS[uint32_t(*it)]  = ffC5TS. make<TH2D>(cname[(uint32_t)(*it)].c_str(), (cname[(uint32_t)(*it)]+";TS;fC").c_str(), 1, 4, 5, 3500, 0, 35000);
+				hfC6TS[uint32_t(*it)]  = ffC6TS. make<TH2D>(cname[(uint32_t)(*it)].c_str(), (cname[(uint32_t)(*it)]+";TS;fC").c_str(), 1, 5, 6, 3500, 0, 35000);
+				hfC7TS[uint32_t(*it)]  = ffC7TS. make<TH2D>(cname[(uint32_t)(*it)].c_str(), (cname[(uint32_t)(*it)]+";TS;fC").c_str(), 1, 6, 7, 3500, 0, 35000);
+				hfC8TS[uint32_t(*it)]  = ffC8TS. make<TH2D>(cname[(uint32_t)(*it)].c_str(), (cname[(uint32_t)(*it)]+";TS;fC").c_str(), 1, 7, 8, 3500, 0, 35000);
+				hfC9TS[uint32_t(*it)]  = ffC9TS. make<TH2D>(cname[(uint32_t)(*it)].c_str(), (cname[(uint32_t)(*it)]+";TS;fC").c_str(), 1, 8, 9, 3500, 0, 35000);
+				hfC10TS[uint32_t(*it)]  = ffC10TS. make<TH2D>(cname[(uint32_t)(*it)].c_str(), (cname[(uint32_t)(*it)]+";TS;fC").c_str(), 1, 9, 10, 3500, 0, 35000);
+
+
+
+
 				hHigh[uint32_t(*it)]=fHigh.make<TH1D>(cname[(uint32_t)(*it)].c_str(), (cname[(uint32_t)(*it)]+";fC;Count").c_str(), 3500, 0, 35000);
 				hLow[uint32_t(*it)] = fLow.make<TH1D> (cname[(uint32_t)(*it)].c_str(), (cname[(uint32_t)(*it)]+";fC;Count").c_str(), 3500, 0, 35000);
 				hSum[uint32_t(*it)] = fSum.make<TH1D> (cname[(uint32_t)(*it)].c_str(), (cname[(uint32_t)(*it)]+";fC;Count").c_str(), 3500, 0, 35000);
@@ -166,6 +210,19 @@ QWZDC2018Analyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 		for ( int ts = 0; ts < NS_; ts++ ) {
 			hADC[uint32_t(*it)]->Fill( ts, (*hadc)[idx] );
 			hfC [uint32_t(*it)]->Fill( ts, (*hfc) [idx] );
+//Saray: Addig plots for each TS
+
+			hfC1TS [uint32_t(*it)]->Fill( ts, (*hfc) [idx] );
+			hfC2TS [uint32_t(*it)]->Fill( ts, (*hfc) [idx] );
+			hfC3TS [uint32_t(*it)]->Fill( ts, (*hfc) [idx] );
+			hfC4TS [uint32_t(*it)]->Fill( ts, (*hfc) [idx] );
+			hfC5TS [uint32_t(*it)]->Fill( ts, (*hfc) [idx] );
+			hfC6TS [uint32_t(*it)]->Fill( ts, (*hfc) [idx] );
+			hfC7TS [uint32_t(*it)]->Fill( ts, (*hfc) [idx] );
+			hfC8TS [uint32_t(*it)]->Fill( ts, (*hfc) [idx] );
+			hfC9TS [uint32_t(*it)]->Fill( ts, (*hfc) [idx] );
+			hfC10TS [uint32_t(*it)]->Fill( ts, (*hfc) [idx] );
+
 			idx++;
 		}
 	}
@@ -189,7 +246,8 @@ QWZDC2018Analyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 			}
 		}
 		trADC_->Fill();
-		trfC_ ->Fill();
+	
+	trfC_ ->Fill();
 	}
 
 	Nevent_++;
@@ -203,6 +261,41 @@ QWZDC2018Analyzer::endJob() {
 		for ( auto it = hfC.begin(); it != hfC.end(); it++ ) {
 			it->second->Scale(1./Nevent_);
 		}
+	//Saray: Addig plots for each TS
+	
+		for ( auto it = hfC1TS.begin(); it != hfC1TS.end(); it++ ) {
+                        it->second->Scale(1./Nevent_);
+		}
+	
+		for ( auto it = hfC2TS.begin(); it != hfC2TS.end(); it++ ) {
+                        it->second->Scale(1./Nevent_);
+                }
+		for ( auto it = hfC3TS.begin(); it != hfC3TS.end(); it++ ) {
+                        it->second->Scale(1./Nevent_);
+                }
+		for ( auto it = hfC4TS.begin(); it != hfC4TS.end(); it++ ) {
+                        it->second->Scale(1./Nevent_);
+                }
+		for ( auto it = hfC5TS.begin(); it != hfC5TS.end(); it++ ) {
+                        it->second->Scale(1./Nevent_);
+                }
+		for ( auto it = hfC6TS.begin(); it != hfC6TS.end(); it++ ) {
+                        it->second->Scale(1./Nevent_);
+                }
+		for ( auto it = hfC7TS.begin(); it != hfC7TS.end(); it++ ) {
+                        it->second->Scale(1./Nevent_);
+                }
+		for ( auto it = hfC8TS.begin(); it != hfC8TS.end(); it++ ) {
+                        it->second->Scale(1./Nevent_);
+                }
+		for ( auto it = hfC9TS.begin(); it != hfC9TS.end(); it++ ) {
+                        it->second->Scale(1./Nevent_);
+                }
+
+
+
+
+
 		for ( auto it = hADC.begin(); it != hADC.end(); it++ ) {
 			it->second->Scale(1./Nevent_);
 		}

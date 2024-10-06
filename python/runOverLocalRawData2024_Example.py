@@ -24,7 +24,7 @@ process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
 
 from Configuration.AlCa.GlobalTag import GlobalTag
-process.GlobalTag = GlobalTag(process.GlobalTag, '132X_dataRun3_Prompt_v4', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, '141X_dataRun3_Prompt_frozen_v3', '')
 
 # needed to supress error from cmssw 14
 process.add_(cms.Service("AdaptorConfig", native=cms.untracked.vstring("root")))
@@ -38,8 +38,7 @@ process.maxEvents = cms.untracked.PSet(
 # Input source
 process.source = cms.Source("HcalTBSource",
     fileNames = cms.untracked.vstring(
-        'file:/afs/cern.ch/user/s/stepobr/public/ZDC2024/USC_384226.root'
-#        '/store/hidata/HIRun2023A/HIForward3/RAW/v1/000/375/703/00000/1fee7000-c1d6-4d6f-8440-6a44bf7107e8.root'
+        'file:/eos/cms/store/group/dpg_hcal/comm_hcal/ZDC/USC/run386363/USC_386363.root'
     ),
     firstLuminosityBlockForEachRun = cms.untracked.VLuminosityBlockID(*[])
 
@@ -100,7 +99,7 @@ process = customiseEarlyDelete(process)
 
 # root output
 process.TFileService = cms.Service("TFileService",
-    fileName = cms.string("ZDCAnalyzer_USC_384226.root"))
+    fileName = cms.string("ZDCAnalyzer_USC_386363.root"))
 
 # =====================================================================
 # add in the zdc analyzer - this writes the digi information to a tree
@@ -137,6 +136,5 @@ process.zdcanalyzer_step = cms.Path(process.zdcanalyzer)
 process.schedule.append(process.zdcanalyzer_step)
 '''
 #=======================================================================
-
 
 
