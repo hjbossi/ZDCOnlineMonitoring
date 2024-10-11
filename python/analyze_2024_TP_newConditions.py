@@ -16,12 +16,13 @@ process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.GlobalTag = GlobalTag(process.GlobalTag, '141X_dataRun3_Prompt_Candidate_2024_10_08_09_42_50', '')
 
 
-process.maxEvents = cms.untracked.PSet(input=cms.untracked.int32(1000))
+process.maxEvents = cms.untracked.PSet(input=cms.untracked.int32(1))
 
 # try for now with pp data from 2024 with ZDC included in global
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
-        '/store/data/Run2024G/ZeroBias/RAW/v1/000/384/797/00000/984ca912-94be-4de8-8b40-c99f13865a00.root',
+        #'/store/data/Run2024G/ZeroBias/RAW/v1/000/384/797/00000/984ca912-94be-4de8-8b40-c99f13865a00.root',
+        '/store/hidata/HIRun2023A/HIZeroBias2/RAW/v1/000/375/694/00000/2e63d9bc-bf96-4a99-b607-755d52d7fe93.root',
     ),
 )
 
@@ -64,3 +65,6 @@ process.p = cms.Path(
     process.hcalDigis *
     process.simHcalTriggerPrimitiveDigis *
     process.compare)
+
+from Configuration.Applications.ConfigBuilder import MassReplaceInputTag
+MassReplaceInputTag(process, new="rawDataRepacker", old="rawDataCollector")
