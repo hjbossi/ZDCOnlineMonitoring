@@ -13,14 +13,19 @@ public:
   // int  eta2ieta(double eta);
   double charge(const QIE10DataFrame& digi, int ts);
   double charge( unsigned fAdc, unsigned fCapId);
+
+  int rechit_Energy_TriggerBit_EM(const QIE10DataFrame& digi);
+  int rechit_Energy_TriggerBit_HAD(const QIE10DataFrame& digi);
   
+  double rechit_Energy_Trigger_EM(const QIE10DataFrame& digi);
+  double rechit_Energy_Trigger_HAD(const QIE10DataFrame& digi);
   double rechit_Energy_RPD(const QIE10DataFrame& digi);
-  double rechit_Time_RPD(const QIE10DataFrame& digi);
-  double rechit_TDCtime_RPD(const QIE10DataFrame& digi);
-  double rechit_ChargeWeightedTime_RPD(const QIE10DataFrame& digi);
-  double rechit_EnergySOIp1_RPD(const QIE10DataFrame& digi);
-  double rechit_RatioSOIp1_RPD(const QIE10DataFrame& digi);
-  int rechit_Saturation_RPD(const QIE10DataFrame& digi);
+  double rechit_Time(const QIE10DataFrame& digi);
+  double rechit_TDCtime(const QIE10DataFrame& digi);
+  double rechit_ChargeWeightedTime(const QIE10DataFrame& digi);
+  double rechit_EnergySOIp1(const QIE10DataFrame& digi);
+  double rechit_RatioSOIp1(const QIE10DataFrame& digi);
+  int rechit_Saturation(const QIE10DataFrame& digi);
   
 
 
@@ -120,9 +125,32 @@ double RPD_Gains[2][16] = {{1.0, 1.0, 1.0, 1.0,
 };
 
 
+double EM_Peds[2][5] = {{120.900, 118.200, 265.400, 113.600, 126.100},
+{136.700, 91.010, 148.000, 78.600, 144.600}
+};
+double EM_PedWidths[2][5] = {{173.600, 161.400, 425.900, 165.200, 196.000},
+{170.700, 112.900, 198.300, 95.610, 193.800}
+};
+
+double EM_Gains[2][5] = {{0.0573900, 0.0573900, 0.0573900, 0.0573900, 0.0573900},
+{0.1026100, 0.1026100, 0.1026100, 0.1026100, 0.1026100}
+};
+
+double HAD_Peds[2][4] = {{181.400, 143.100, 136.800, 127.700},
+{54.670, 47.520, 60.920, 64.960}
+};
+double HAD_PedWidths[2][4] = {{252.000, 199.500, 187.600, 183.600},
+{62.620, 55.460, 72.370, 81.590}
+};
+
+double HAD_Gains[2][4] = {{0.5739000, 0.5739000, 0.5739000, 0.5739000},
+{1.0261000, 1.0261000, 1.0261000, 1.0261000}
+};
+
 int nTs_ = 6;
 int signalTs_ = 2;
 int noiseTs_ = 1; 
+float ootpuFrac = 97.0/256.0;
 int maxValue_ = 255;
 
 inline double subPedestal(const float charge, const float ped, const float width) {

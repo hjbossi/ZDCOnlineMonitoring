@@ -17,6 +17,81 @@ double ZDCHardCodeHelper::charge(const QIE10DataFrame& digi, int ts){
 }
 
 
+int ZDCHardCodeHelper::rechit_Energy_TriggerBit_EM(const QIE10DataFrame& digi){
+   HcalZDCDetId zdcid = digi.id();
+   int zside = zdcid.zside();
+   int channel = zdcid.channel();
+   
+   double energy = 0;
+   double noise = 0;
+   double ped =0;
+   double width =0;
+   double gain = 0;
+   if(zside < 0) {ped = EM_Peds[0][channel-1]; width = EM_PedWidths[0][channel-1]; gain = EM_Gains[0][channel-1];}
+   else {ped = EM_Peds[1][channel-1]; width = EM_PedWidths[1][channel-1]; gain = EM_Gains[1][channel-1];}
+   energy = subPedestal(charge(digi, signalTs_), ped, width)*gain;
+   noise = ootpuFrac*subPedestal(charge(digi, noiseTs_), ped, width)*gain;
+   int int_Energy = std::min(std::max(0, int(energy/(50.0))), 1023);
+   int int_Noise = std::min(std::max(0, int(noise/(50.0))), 1023);
+   return(std::max(0, int_Energy- int_Noise));
+}
+
+int ZDCHardCodeHelper::rechit_Energy_TriggerBit_HAD(const QIE10DataFrame& digi){
+     
+   HcalZDCDetId zdcid = digi.id();
+   int zside = zdcid.zside();
+   int channel = zdcid.channel();
+   
+   double energy = 0;
+   double noise = 0;
+   double ped =0;
+   double width =0;
+   double gain = 0;
+   if(zside < 0) {ped = HAD_Peds[0][channel-1]; width = HAD_PedWidths[0][channel-1]; gain = HAD_Gains[0][channel-1];}
+   else {ped = HAD_Peds[1][channel-1]; width = HAD_PedWidths[1][channel-1]; gain = HAD_Gains[1][channel-1];}
+   energy = subPedestal(charge(digi, signalTs_), ped, width)*gain;
+   noise = ootpuFrac*subPedestal(charge(digi, noiseTs_), ped, width)*gain;
+   int int_Energy = std::min(std::max(0, int(energy/(50.0))), 1023);
+   int int_Noise = std::min(std::max(0, int(noise/(50.0))), 1023);
+   return(std::max(0, int_Energy- int_Noise));
+}
+
+double ZDCHardCodeHelper::rechit_Energy_Trigger_EM(const QIE10DataFrame& digi){
+   HcalZDCDetId zdcid = digi.id();
+   int zside = zdcid.zside();
+   int channel = zdcid.channel();
+   
+   double energy = 0;
+   double noise = 0;
+   double ped =0;
+   double width =0;
+   double gain = 0;
+   if(zside < 0) {ped = EM_Peds[0][channel-1]; width = EM_PedWidths[0][channel-1]; gain = EM_Gains[0][channel-1];}
+   else {ped = EM_Peds[1][channel-1]; width = EM_PedWidths[1][channel-1]; gain = EM_Gains[1][channel-1];}
+   energy = subPedestal(charge(digi, signalTs_), ped, width)*gain;
+   noise = ootpuFrac*subPedestal(charge(digi, noiseTs_), ped, width)*gain;
+   return(std::max(0.0, energy- noise));
+}
+
+double ZDCHardCodeHelper::rechit_Energy_Trigger_HAD(const QIE10DataFrame& digi){
+     
+   HcalZDCDetId zdcid = digi.id();
+   int zside = zdcid.zside();
+   int channel = zdcid.channel();
+   
+   double energy = 0;
+   double noise = 0;
+   double ped =0;
+   double width =0;
+   double gain = 0;
+   if(zside < 0) {ped = HAD_Peds[0][channel-1]; width = HAD_PedWidths[0][channel-1]; gain = HAD_Gains[0][channel-1];}
+   else {ped = HAD_Peds[1][channel-1]; width = HAD_PedWidths[1][channel-1]; gain = HAD_Gains[1][channel-1];}
+   energy = subPedestal(charge(digi, signalTs_), ped, width)*gain;
+   noise = ootpuFrac*subPedestal(charge(digi, noiseTs_), ped, width)*gain;
+   return(std::max(0.0, energy- noise));
+}
+
+
 double ZDCHardCodeHelper::rechit_Energy_RPD(const QIE10DataFrame& digi){
      
    HcalZDCDetId zdcid = digi.id();
@@ -33,7 +108,7 @@ double ZDCHardCodeHelper::rechit_Energy_RPD(const QIE10DataFrame& digi){
    return(energy);
 }
 
-double ZDCHardCodeHelper::rechit_Time_RPD(const QIE10DataFrame& digi){
+double ZDCHardCodeHelper::rechit_Time(const QIE10DataFrame& digi){
    double time = -9999.0;
    if(signalTs_ > 0 && signalTs_ <digi.samples() -1 ){
       
@@ -51,7 +126,7 @@ double ZDCHardCodeHelper::rechit_Time_RPD(const QIE10DataFrame& digi){
    }
    return(time);
 }
-double ZDCHardCodeHelper::rechit_TDCtime_RPD(const QIE10DataFrame& digi){
+double ZDCHardCodeHelper::rechit_TDCtime(const QIE10DataFrame& digi){
     float tmp_tdctime = 0;
     int le_tdc = digi[signalTs_].le_tdc();
     // TDC error codes will be 60=-1, 61 = -2, 62 = -3, 63 = -4
@@ -62,7 +137,7 @@ double ZDCHardCodeHelper::rechit_TDCtime_RPD(const QIE10DataFrame& digi){
    return(tmp_tdctime);
 }
 
-double ZDCHardCodeHelper::rechit_ChargeWeightedTime_RPD(const QIE10DataFrame& digi){
+double ZDCHardCodeHelper::rechit_ChargeWeightedTime(const QIE10DataFrame& digi){
    double time = -99.0;
       
    double tmp_energy = 0;
@@ -77,7 +152,7 @@ double ZDCHardCodeHelper::rechit_ChargeWeightedTime_RPD(const QIE10DataFrame& di
    return(time);
 }
 
-double ZDCHardCodeHelper::rechit_EnergySOIp1_RPD(const QIE10DataFrame& digi){
+double ZDCHardCodeHelper::rechit_EnergySOIp1(const QIE10DataFrame& digi){
      
    HcalZDCDetId zdcid = digi.id();
    int zside = zdcid.zside();
@@ -90,7 +165,7 @@ double ZDCHardCodeHelper::rechit_EnergySOIp1_RPD(const QIE10DataFrame& digi){
    energy = subPedestal(charge(digi, signalTs_ +1), 0.0, 0.0)*gain;
    return(energy);
 }
-double ZDCHardCodeHelper::rechit_RatioSOIp1_RPD(const QIE10DataFrame& digi){
+double ZDCHardCodeHelper::rechit_RatioSOIp1(const QIE10DataFrame& digi){
 
    HcalZDCDetId zdcid = digi.id();
    int zside = zdcid.zside();
@@ -108,7 +183,7 @@ double ZDCHardCodeHelper::rechit_RatioSOIp1_RPD(const QIE10DataFrame& digi){
    return(ratio);
 }
 
-int ZDCHardCodeHelper::rechit_Saturation_RPD(const QIE10DataFrame& digi){
+int ZDCHardCodeHelper::rechit_Saturation(const QIE10DataFrame& digi){
    int isSaturated = 0;
     for (int i =0; i < digi.samples(); i++) {
       if (digi[i].adc() >= maxValue_) {
