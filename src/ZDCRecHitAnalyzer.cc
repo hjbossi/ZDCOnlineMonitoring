@@ -489,7 +489,7 @@ void ZDCRecHitAnalyzer::beginJob() {
     
      if(!skipRPD_){
      t1->Branch("ZDCp_RPD_n", &ZDCp_RPD_n );
-     t1->Branch("ZDCp_RPD_Channel", ZDCp_RPD_Channel, "ZDCp_RPD_Channel[ZDCp_EM_n]/I");
+     t1->Branch("ZDCp_RPD_Channel", ZDCp_RPD_Channel, "ZDCp_RPD_Channel[ZDCp_RPD_n]/I");
      t1->Branch("ZDCp_RPD_Energy", ZDCp_RPD_Energy, "ZDCp_RPD_Energy[ZDCp_RPD_n]/F");
      t1->Branch("ZDCp_RPD_Time", ZDCp_RPD_Time, "ZDCp_RPD_Time[ZDCp_RPD_n]/F");
      t1->Branch("ZDCp_RPD_TDCtime", ZDCp_RPD_TDCtime, "ZDCp_RPD_TDCtime[ZDCp_RPD_n]/F");
@@ -520,7 +520,7 @@ void ZDCRecHitAnalyzer::beginJob() {
  
      if(!skipRPD_){
      t1->Branch("ZDCm_RPD_n", &ZDCm_RPD_n );
-     t1->Branch("ZDCm_RPD_Channel", ZDCm_RPD_Channel, "ZDCm_RPD_Channel[ZDCm_EM_n]/I");
+     t1->Branch("ZDCm_RPD_Channel", ZDCm_RPD_Channel, "ZDCm_RPD_Channel[ZDCm_RPD_n]/I");
      t1->Branch("ZDCm_RPD_Energy", ZDCm_RPD_Energy, "ZDCm_RPD_Energy[ZDCm_RPD_n]/F");
      t1->Branch("ZDCm_RPD_Time", ZDCm_RPD_Time, "ZDCm_RPD_Time[ZDCm_RPD_n]/F");
      t1->Branch("ZDCm_RPD_TDCtime", ZDCm_RPD_TDCtime, "ZDCm_RPD_TDCtime[ZDCm_RPD_n]/F");
