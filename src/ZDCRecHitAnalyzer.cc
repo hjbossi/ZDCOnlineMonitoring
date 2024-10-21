@@ -288,8 +288,6 @@ void ZDCRecHitAnalyzer::beginJob() {
      t1->Branch("zdcrechit_RatioSOIp1",zdc_RatioSOIp1,"zdcrechit_RatioSOIp1[zdcrechit_n]/F");    
      t1->Branch("zdcrechit_Saturation",zdc_Saturation,"zdcrechit_Saturation[zdcrechit_n]/I");    
      
-
-     
   }
   
   if(doZdcDigis_){
