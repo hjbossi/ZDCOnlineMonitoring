@@ -2,7 +2,7 @@ import FWCore.ParameterSet.Config as cms
 
 zdcanalyzer = cms.EDAnalyzer(
    "ZDCRecHitAnalyzer",
-   ZDCSource    = cms.InputTag('zdcrecoRun3'),
+   ZDCRecHitSource    = cms.InputTag('zdcrecoRun3'),
    ZDCDigiSource    = cms.InputTag('hcalDigis', 'ZDC'),
    doZdcRecHits = cms.bool(True),
    doZdcDigis = cms.bool(True),
