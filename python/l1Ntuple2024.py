@@ -55,7 +55,8 @@ process.maxEvents = cms.untracked.PSet(
 
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
-        '/store/hidata/HIRun2023A/HIForward0/RAW/v1/000/375/697/00000/3cc42004-7d46-467d-89db-d04005b11227.root'
+        #'/store/hidata/HIRun2023A/HIForward0/RAW/v1/000/375/697/00000/3cc42004-7d46-467d-89db-d04005b11227.root'
+        '/store/backfill/1/hidata/Tier0_HIREPLAY_2024/HIMinimumBias0/RAW/v17225534/000/374/951/00000/5a93faa9-6363-4e13-805e-3d1928a181c3.root'
     )
 )
 
@@ -129,6 +130,10 @@ from L1Trigger.L1TNtuples.customiseL1Ntuple import L1NtupleRAWEMU
 
 #call to customisation function L1NtupleRAWEMU imported from L1Trigger.L1TNtuples.customiseL1Ntuple
 process = L1NtupleRAWEMU(process)
+
+# add hcal calibrations
+from L1Trigger.Configuration.customiseReEmul import L1TReEmulFromRAWsimHcalTP
+process = L1TReEmulFromRAWsimHcalTP(process) 
 
 # Automatic addition of the customisation function from L1Trigger.Configuration.customiseSettings
 from L1Trigger.Configuration.customiseSettings import L1TSettingsToCaloParams_2018_v1_4_1 
