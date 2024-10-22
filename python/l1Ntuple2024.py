@@ -21,8 +21,13 @@ process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
 
 #Replace GT for running over 2024
-GT        = "141X_dataRun3_Prompt_Candidate_2024_10_08_09_42_50"
-process.GlobalTag.globaltag = GT
+from Configuration.AlCa.GlobalTag import GlobalTag
+process.load("SimCalorimetry.HcalTrigPrimProducers.hcaltpdigi_cff")
+process.HcalTPGCoderULUT.LUTGenerationMode = cms.bool(False)
+#process.GlobalTag = GlobalTag(process.GlobalTag, '141X_dataRun3_HLT_Candidate_2024_10_20_06_24_01', 'Tag,HcalL1TriggerObjectsRcd,sqlite_file:HcalL1TriggerObjects_2024_ZDC_TEST_B.db')
+process.GlobalTag = GlobalTag(process.GlobalTag, '141X_dataRun3_HLT_Candidate_2024_10_20_06_24_01', 'Tag,HcalL1TriggerObjectsRcd,sqlite_file:HcalL1TriggerObjects_2024_ZDC_HCAL_B.db')
+
+
 
 # To change the number of events, change this part
 process.maxEvents = cms.untracked.PSet(
