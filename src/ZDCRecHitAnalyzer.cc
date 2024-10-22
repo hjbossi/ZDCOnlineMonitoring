@@ -78,8 +78,8 @@ private:
   void endJob() override;
 
   // ----------member data ---------------------------
-   const edm::EDGetTokenT<QIE10DigiCollection> ZDCDigiToken_;  //used to select what tracks to read from configuration file
-   const edm::EDGetTokenT<edm::SortedCollection<ZDCRecHit>> ZDCToken_;  //used to select what tracks to read from configuration file
+   const edm::EDGetTokenT<QIE10DigiCollection> ZDCDigiToken_; 
+   const edm::EDGetTokenT<edm::SortedCollection<ZDCRecHit>> ZDCRecHitToken_; 
    edm::ESGetToken<HcalDbService, HcalDbRecord> hcalDatabaseToken_;
   bool doZdcRecHits_;
   bool doZdcDigis_;
@@ -101,65 +101,10 @@ private:
    float zdc_ChargeWeightedTime[50];
    float zdc_EnergySOIp1[50];
    float zdc_RatioSOIp1[50];
-   
-   
-   float ZDCp_Total_Energy;
-   
-   int ZDCp_EM_n;
-   int ZDCp_EM_Channel[5];
-   float ZDCp_EM_Energy[5];
-   float ZDCp_EM_Time[5];
-   float ZDCp_EM_TDCtime[5];
-   float ZDCp_EM_ChargeWeightedTime[5];
-   float ZDCp_EM_EnergySOIp1[5];
-   float ZDCp_EM_RatioSOIp1[5];
-   
-   int ZDCp_HAD_n;
-   int ZDCp_HAD_Channel[4];
-   float ZDCp_HAD_Energy[4];
-   float ZDCp_HAD_Time[4];
-   float ZDCp_HAD_TDCtime[4];
-   float ZDCp_HAD_ChargeWeightedTime[4];
-   float ZDCp_HAD_EnergySOIp1[4];
-   float ZDCp_HAD_RatioSOIp1[4];
-   
-   int ZDCp_RPD_n;
-   int ZDCp_RPD_Channel[16];
-   float ZDCp_RPD_Energy[16];
-   float ZDCp_RPD_Time[16];
-   float ZDCp_RPD_TDCtime[16];
-   float ZDCp_RPD_ChargeWeightedTime[16];
-   float ZDCp_RPD_EnergySOIp1[16];
-   float ZDCp_RPD_RatioSOIp1[16];
-   
-   float ZDCm_Total_Energy;
-   
-   int ZDCm_EM_n;
-   int ZDCm_EM_Channel[5];
-   float ZDCm_EM_Energy[5];
-   float ZDCm_EM_Time[5];
-   float ZDCm_EM_TDCtime[5];
-   float ZDCm_EM_ChargeWeightedTime[5];
-   float ZDCm_EM_EnergySOIp1[5];
-   float ZDCm_EM_RatioSOIp1[5];
-   
-   int ZDCm_HAD_n;
-   int ZDCm_HAD_Channel[4];
-   float ZDCm_HAD_Energy[4];
-   float ZDCm_HAD_Time[4];
-   float ZDCm_HAD_TDCtime[4];
-   float ZDCm_HAD_ChargeWeightedTime[4];
-   float ZDCm_HAD_EnergySOIp1[4];
-   float ZDCm_HAD_RatioSOIp1[4];
+   int zdc_Saturation[50];
 
-   int ZDCm_RPD_n;
-   int ZDCm_RPD_Channel[16];
-   float ZDCm_RPD_Energy[16];
-   float ZDCm_RPD_Time[16];
-   float ZDCm_RPD_TDCtime[16];
-   float ZDCm_RPD_ChargeWeightedTime[16];
-   float ZDCm_RPD_EnergySOIp1[16];
-   float ZDCm_RPD_RatioSOIp1[16];
+   float ZDCp_Energy;
+   float ZDCm_Energy;  
    
 
 #ifdef THIS_IS_AN_EVENTSETUP_EXAMPLE
@@ -180,7 +125,7 @@ private:
 //
 ZDCRecHitAnalyzer::ZDCRecHitAnalyzer(const edm::ParameterSet& iConfig) :
       ZDCDigiToken_(consumes<QIE10DigiCollection>(iConfig.getParameter<edm::InputTag>("ZDCDigiSource"))), 
-      ZDCToken_(consumes<edm::SortedCollection<ZDCRecHit>>(iConfig.getParameter<edm::InputTag>("ZDCSource"))), 
+      ZDCRecHitToken_(consumes<edm::SortedCollection<ZDCRecHit>>(iConfig.getParameter<edm::InputTag>("ZDCRecHitSource"))), 
       hcalDatabaseToken_(esConsumes<HcalDbService, HcalDbRecord>()),
       doZdcRecHits_(iConfig.getParameter<bool>("doZdcRecHits")),
       doZdcDigis_(iConfig.getParameter<bool>("doZdcDigis")),
@@ -212,14 +157,8 @@ void ZDCRecHitAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup&
   
   if(doZdcRecHits_){
      zdc_n = 0;
-     ZDCp_Total_Energy = 0;
-     ZDCp_EM_n =0;
-     ZDCp_HAD_n =0;
-     ZDCp_RPD_n =0;  
-     ZDCm_Total_Energy = 0;
-     ZDCm_EM_n =0;
-     ZDCm_HAD_n =0;
-     ZDCm_RPD_n =0;
+     ZDCp_Energy = 0;
+     ZDCm_Energy = 0;
      for (unsigned int i = 0; i < 50; i++) {
      zdc_side[i] = -99;
      zdc_section [i]= -99;
@@ -231,75 +170,22 @@ void ZDCRecHitAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup&
      zdc_ChargeWeightedTime[i] = -99;
      zdc_EnergySOIp1[i] = -99;
      zdc_RatioSOIp1[i] = -99;
-     
-     if(i>=16) continue;
-     ZDCp_RPD_Channel[i] = -99;
-     ZDCp_RPD_Energy[i] = -99;
-     ZDCp_RPD_Time[i] = -99;
-     ZDCp_RPD_TDCtime[i] = -99;
-     ZDCp_RPD_ChargeWeightedTime[i] = -99;
-     ZDCp_RPD_EnergySOIp1[i] = -99;
-     // ZDCp_RPD_TimeSOIp1[i] = -99; 
-
-     ZDCm_RPD_Channel[i] = -99;
-     ZDCm_RPD_Energy[i] = -99;
-     ZDCm_RPD_Time[i] = -99;
-     ZDCm_RPD_TDCtime[i] = -99;
-     ZDCm_RPD_ChargeWeightedTime[i] = -99;
-     ZDCm_RPD_EnergySOIp1[i] = -99;
-     // ZDCm_RPD_TimeSOIp1[i] = -99;  
-
-     if(i>=5) continue;
-     ZDCp_EM_Channel[i] = -99;
-     ZDCp_EM_Energy[i] = -99;
-     ZDCp_EM_Time[i] = -99;
-     ZDCp_EM_TDCtime[i] = -99;
-     ZDCp_EM_ChargeWeightedTime[i] = -99;
-     ZDCp_EM_EnergySOIp1[i] = -99;
-     // ZDCp_EM_TimeSOIp1[i] = -99; 
-
-     ZDCm_EM_Channel[i] = -99;
-     ZDCm_EM_Energy[i] = -99;
-     ZDCm_EM_Time[i] = -99;
-     ZDCm_EM_TDCtime[i] = -99;
-     ZDCm_EM_ChargeWeightedTime[i] = -99;
-     ZDCm_EM_EnergySOIp1[i] = -99;
-     // ZDCm_EM_TimeSOIp1[i] = -99;
-
-     if(i>=4) continue;
-     ZDCp_HAD_Channel[i] = -99;
-     ZDCp_HAD_Energy[i] = -99;
-     ZDCp_HAD_Time[i] = -99;
-     ZDCp_HAD_TDCtime[i] = -99;
-     ZDCp_HAD_ChargeWeightedTime[i] = -99;
-     ZDCp_HAD_EnergySOIp1[i] = -99;
-     // ZDCp_HAD_TimeSOIp1[i] = -99; 
-
-     ZDCm_HAD_Channel[i] = -99;
-     ZDCm_HAD_Energy[i] = -99;
-     ZDCm_HAD_Time[i] = -99;
-     ZDCm_HAD_TDCtime[i] = -99;
-     ZDCm_HAD_ChargeWeightedTime[i] = -99;
-     ZDCm_HAD_EnergySOIp1[i] = -99;
-     // ZDCm_HAD_TimeSOIp1[i] = -99;     
+     zdc_Saturation[i] = -99;
+       
      }
      
        edm::Handle<ZDCRecHitCollection> zdcrechits;
-      iEvent.getByToken(ZDCToken_, zdcrechits);
+      iEvent.getByToken(ZDCRecHitToken_, zdcrechits);
        // zdc_n = zdcrechits->size();   
        int nhits = 0;
        for (auto const& rh : *zdcrechits) {
+          
+         if (nhits  >= 50) break;          
          HcalZDCDetId zdcid = rh.id();
-         if (nhits  < 50) {
           int side = zdcid.zside();
           int section = zdcid.section();
           int channel =zdcid.channel(); 
           float energy = rh.energy();
-          float time = rh.time();
-          float TDCtime  = rh.TDCtime();
-          float chargeWeightedTime  = rh.TDCtime();
-          float energySOIp1  = rh.energySOIp1();
-          float ratioSOIp1  = rh.ratioSOIp1();
           
           if(section ==4 && skipRPD_ ) continue;
           
@@ -308,83 +194,15 @@ void ZDCRecHitAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup&
           zdc_channel[nhits] = channel;
           
           zdc_Energy[nhits]  = energy;
-          zdc_Time[nhits]  = time;
-          zdc_TDCtime[nhits]  = TDCtime;
-          zdc_ChargeWeightedTime[nhits] = chargeWeightedTime;
-          zdc_EnergySOIp1[nhits]  = energySOIp1;
-          zdc_RatioSOIp1[nhits]  = ratioSOIp1;
+          zdc_Time[nhits]  = rh.time();
+          zdc_TDCtime[nhits]  = rh.TDCtime();
+          zdc_ChargeWeightedTime[nhits] = rh.chargeWeightedTime();
+          zdc_EnergySOIp1[nhits]  = rh.energySOIp1();
+          zdc_RatioSOIp1[nhits]  = rh.ratioSOIp1();
+          zdc_Saturation[nhits] = static_cast<int>( rh.flagField(HcalCaloFlagLabels::ADCSaturationBit) );
           
-          
-          if(side >0 ){
-            if(section==1){
-               ZDCp_Total_Energy+= energy;
-              ZDCp_EM_Channel[ZDCp_EM_n] = channel;
-              ZDCp_EM_Energy[ZDCp_EM_n] = energy;
-              ZDCp_EM_Time[ZDCp_EM_n] = time;
-              ZDCp_EM_TDCtime[ZDCp_EM_n] = TDCtime;
-              ZDCp_EM_ChargeWeightedTime[ZDCp_EM_n] = chargeWeightedTime;
-              ZDCp_EM_EnergySOIp1[ZDCp_EM_n] = energySOIp1;
-              ZDCp_EM_RatioSOIp1[ZDCp_EM_n] = ratioSOIp1; 
-              ZDCp_EM_n++;
-            }
-            if(section==2){
-              ZDCp_Total_Energy+= energy;
-              ZDCp_HAD_Channel[ZDCp_HAD_n] = channel;
-              ZDCp_HAD_Energy[ZDCp_HAD_n] = energy;
-              ZDCp_HAD_Time[ZDCp_HAD_n] = time;
-              ZDCp_HAD_TDCtime[ZDCp_HAD_n] = TDCtime;
-              ZDCp_HAD_ChargeWeightedTime[ZDCp_HAD_n] = chargeWeightedTime;
-              ZDCp_HAD_EnergySOIp1[ZDCp_HAD_n] = energySOIp1;
-              ZDCp_HAD_RatioSOIp1[ZDCp_HAD_n] = ratioSOIp1; 
-              ZDCp_HAD_n++;
-            }
-            if(section==4){
-              ZDCp_RPD_Channel[ZDCp_RPD_n] = channel;
-              ZDCp_RPD_Energy[ZDCp_RPD_n] = energy;
-              ZDCp_RPD_Time[ZDCp_RPD_n] = time;
-              ZDCp_RPD_TDCtime[ZDCp_RPD_n] = TDCtime;
-              ZDCp_RPD_ChargeWeightedTime[ZDCp_RPD_n] = chargeWeightedTime;
-              ZDCp_RPD_EnergySOIp1[ZDCp_RPD_n] = energySOIp1;
-              ZDCp_RPD_RatioSOIp1[ZDCp_RPD_n] = ratioSOIp1; 
-              ZDCp_RPD_n++; 
-            }
-          }
-          
-          if(side <0 ){
-            if(section==1){
-              ZDCm_Total_Energy+= energy;
-              ZDCm_EM_Channel[ZDCm_EM_n] = channel;
-              ZDCm_EM_Energy[ZDCm_EM_n] = energy;
-              ZDCm_EM_Time[ZDCm_EM_n] = time;
-              ZDCm_EM_TDCtime[ZDCm_EM_n] = TDCtime;
-              ZDCm_EM_ChargeWeightedTime[ZDCm_EM_n] = chargeWeightedTime;
-              ZDCm_EM_EnergySOIp1[ZDCm_EM_n] = energySOIp1;
-              ZDCm_EM_RatioSOIp1[ZDCm_EM_n] = ratioSOIp1; 
-              ZDCm_EM_n++;
-            }
-            if(section==2){
-              ZDCm_Total_Energy+= energy;
-              ZDCm_HAD_Channel[ZDCm_HAD_n] = channel;
-              ZDCm_HAD_Energy[ZDCm_HAD_n] = energy;
-              ZDCm_HAD_Time[ZDCm_HAD_n] = time;
-              ZDCm_HAD_TDCtime[ZDCm_HAD_n] = TDCtime;
-              ZDCm_HAD_ChargeWeightedTime[ZDCm_HAD_n] = chargeWeightedTime;
-              ZDCm_HAD_EnergySOIp1[ZDCm_HAD_n] = energySOIp1;
-              ZDCm_HAD_RatioSOIp1[ZDCm_HAD_n] = ratioSOIp1; 
-              ZDCm_HAD_n++;
-            }
-            if(section==4){
-              ZDCm_RPD_Channel[ZDCm_RPD_n] = channel;
-              ZDCm_RPD_Energy[ZDCm_RPD_n] = energy;
-              ZDCm_RPD_Time[ZDCm_RPD_n] = time;
-              ZDCm_RPD_TDCtime[ZDCm_RPD_n] = TDCtime;
-              ZDCm_RPD_ChargeWeightedTime[ZDCm_RPD_n] = chargeWeightedTime;
-              ZDCm_RPD_EnergySOIp1[ZDCm_RPD_n] = energySOIp1;
-              ZDCm_RPD_RatioSOIp1[ZDCm_RPD_n] = ratioSOIp1; 
-              ZDCm_RPD_n++; 
-            }
-          }
-         }
+          if(side <0 && (section ==1 || section ==2)) ZDCm_Energy += energy;
+          if(side >0 && (section ==1 || section ==2)) ZDCp_Energy += energy;
 
          nhits++;
        } // end loop zdc rechits 
@@ -401,8 +219,7 @@ void ZDCRecHitAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup&
     int nhits = 0;
 
 
-    for (auto it = zdcdigis->begin(); it != zdcdigis->end(); it++) {
-       
+    for (auto it = zdcdigis->begin(); it != zdcdigis->end(); it++) {      
       const QIE10DataFrame digi = static_cast<const QIE10DataFrame>(*it);
 
       HcalZDCDetId zdcid = digi.id();
@@ -412,6 +229,8 @@ void ZDCRecHitAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup&
       if(section== 1 && channel> 5) continue; // ignore extra EM channels 
       if(section ==4 && skipRPD_ ) continue;
       
+      if (nhits  >= 50) break;       
+
       CaloSamples caldigi;
 
       //const ZDCDataFrame & rh = (*zdcdigis)[it];
@@ -423,7 +242,6 @@ void ZDCRecHitAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup&
         coder.adc2fC(digi, caldigi);
 
 
-      if (nhits < 50) {
         zdcDigi.zside[nhits] = side;
         zdcDigi.section[nhits] = section;
         zdcDigi.channel[nhits] = channel;
@@ -434,9 +252,8 @@ void ZDCRecHitAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup&
           zdcDigi.adc[ts][nhits] = digi[ts].adc();
           zdcDigi.tdc[ts][nhits] = digi[ts].le_tdc();
         }
-      }
       nhits++;
-    }  // end loop zdc rechits
+    }  // end loop zdc digis
 
     zdcDigi.n = nhits;
   }    
@@ -454,8 +271,11 @@ void ZDCRecHitAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup&
 void ZDCRecHitAnalyzer::beginJob() {
   // please remove this method if not needed
   t1 = fs->make<TTree>("zdcrechit", "zdcrechit");
-  
-  if(doZdcRecHits_){
+   if(doZdcRecHits_){
+     
+     t1->Branch("ZDCp_Energy",&ZDCp_Energy); 
+     t1->Branch("ZDCm_Energy",&ZDCm_Energy);
+     
      t1->Branch("zdcrechit_n",&zdc_n);
      t1->Branch("zdcrechit_side",zdc_side,"zdcrechit_side[zdcrechit_n]/I");
      t1->Branch("zdcrechit_section",zdc_section,"zdcrechit_section[zdcrechit_n]/I");
@@ -465,69 +285,9 @@ void ZDCRecHitAnalyzer::beginJob() {
      t1->Branch("zdcrechit_TDCtime",zdc_TDCtime,"zdcrechit_TDCtime[zdcrechit_n]/F");    
      t1->Branch("zdcrechit_ChargeWeightedTime",zdc_ChargeWeightedTime,"zdcrechit_ChargeWeightedTime[zdcrechit_n]/F");    
      t1->Branch("zdcrechit_EnergySOIp1",zdc_EnergySOIp1,"zdcrechit_EnergySOIp1[zdcrechit_n]/F");    
-     t1->Branch("zdcrechit_RatioSOIp1",zdc_RatioSOIp1,"zdcrechit_RatioSOIp1[zdcrechit_n]/F");     
+     t1->Branch("zdcrechit_RatioSOIp1",zdc_RatioSOIp1,"zdcrechit_RatioSOIp1[zdcrechit_n]/F");    
+     t1->Branch("zdcrechit_Saturation",zdc_Saturation,"zdcrechit_Saturation[zdcrechit_n]/I");    
      
-     t1->Branch("ZDCp_Total_Energy",&ZDCp_Total_Energy);
-     
-     t1->Branch("ZDCp_EM_n", &ZDCp_EM_n);
-     t1->Branch("ZDCp_EM_Channel", ZDCp_EM_Channel, "ZDCp_EM_Channel[ZDCp_EM_n]/I");
-     t1->Branch("ZDCp_EM_Energy", ZDCp_EM_Energy, "ZDCp_EM_Energy[ZDCp_EM_n]/F");
-     t1->Branch("ZDCp_EM_Time", ZDCp_EM_Time, "ZDCp_EM_Time[ZDCp_EM_n]/F");
-     t1->Branch("ZDCp_EM_TDCtime", ZDCp_EM_TDCtime, "ZDCp_EM_TDCtime[ZDCp_EM_n]/F");
-     t1->Branch("ZDCp_EM_ChargeWeightedTime", ZDCp_EM_ChargeWeightedTime, "ZDCp_EM_ChargeWeightedTime[ZDCp_EM_n]/F");
-     t1->Branch("ZDCp_EM_EnergySOIp1", ZDCp_EM_EnergySOIp1, "ZDCp_EM_EnergySOIp1[ZDCp_EM_n]/F");
-     t1->Branch("ZDCp_EM_RatioSOIp1", ZDCp_EM_RatioSOIp1, "ZDCp_EM_RatioSOIp1[ZDCp_EM_n]/F");
-     
-     t1->Branch("ZDCp_HAD_n", &ZDCp_HAD_n );
-     t1->Branch("ZDCp_HAD_Channel", ZDCp_HAD_Channel, "ZDCp_HAD_Channel[ZDCp_HAD_n]/I");
-     t1->Branch("ZDCp_HAD_Energy", ZDCp_HAD_Energy, "ZDCp_HAD_Energy[ZDCp_HAD_n]/F");
-     t1->Branch("ZDCp_HAD_Time", ZDCp_HAD_Time, "ZDCp_HAD_Time[ZDCp_HAD_n]/F");
-     t1->Branch("ZDCp_HAD_TDCtime", ZDCp_HAD_TDCtime, "ZDCp_HAD_TDCtime[ZDCp_HAD_n]/F");
-     t1->Branch("ZDCp_HAD_ChargeWeightedTime", ZDCp_HAD_ChargeWeightedTime, "ZDCp_HAD_ChargeWeightedTime[ZDCp_HAD_n]/F");
-     t1->Branch("ZDCp_HAD_EnergySOIp1", ZDCp_HAD_EnergySOIp1, "ZDCp_HAD_EnergySOIp1[ZDCp_HAD_n]/F");
-     t1->Branch("ZDCp_HAD_RatioSOIp1", ZDCp_HAD_RatioSOIp1, "ZDCp_HAD_RatioSOIp1[ZDCp_HAD_n]/F");
-    
-     if(!skipRPD_){
-     t1->Branch("ZDCp_RPD_n", &ZDCp_RPD_n );
-     t1->Branch("ZDCp_RPD_Channel", ZDCp_RPD_Channel, "ZDCp_RPD_Channel[ZDCp_RPD_n]/I");
-     t1->Branch("ZDCp_RPD_Energy", ZDCp_RPD_Energy, "ZDCp_RPD_Energy[ZDCp_RPD_n]/F");
-     t1->Branch("ZDCp_RPD_Time", ZDCp_RPD_Time, "ZDCp_RPD_Time[ZDCp_RPD_n]/F");
-     t1->Branch("ZDCp_RPD_TDCtime", ZDCp_RPD_TDCtime, "ZDCp_RPD_TDCtime[ZDCp_RPD_n]/F");
-     t1->Branch("ZDCp_RPD_ChargeWeightedTime", ZDCp_RPD_ChargeWeightedTime, "ZDCp_RPD_ChargeWeightedTime[ZDCp_RPD_n]/F");
-     t1->Branch("ZDCp_RPD_EnergySOIp1", ZDCp_RPD_EnergySOIp1, "ZDCp_RPD_EnergySOIp1[ZDCp_RPD_n]/F");
-     t1->Branch("ZDCp_RPD_RatioSOIp1", ZDCp_RPD_RatioSOIp1, "ZDCp_RPD_RatioSOIp1[ZDCp_RPD_n]/F");
-     }
-     
-     t1->Branch("ZDCm_Total_Energy",&ZDCm_Total_Energy);
-     
-     t1->Branch("ZDCm_EM_n", &ZDCm_EM_n);
-     t1->Branch("ZDCm_EM_Channel", ZDCm_EM_Channel, "ZDCm_EM_Channel[ZDCm_EM_n]/I");
-     t1->Branch("ZDCm_EM_Energy", ZDCm_EM_Energy, "ZDCm_EM_Energy[ZDCm_EM_n]/F");
-     t1->Branch("ZDCm_EM_Time", ZDCm_EM_Time, "ZDCm_EM_Time[ZDCm_EM_n]/F");
-     t1->Branch("ZDCm_EM_TDCtime", ZDCm_EM_TDCtime, "ZDCm_EM_TDCtime[ZDCm_EM_n]/F");
-     t1->Branch("ZDCm_EM_ChargeWeightedTime", ZDCm_EM_ChargeWeightedTime, "ZDCm_EM_ChargeWeightedTime[ZDCm_EM_n]/F");
-     t1->Branch("ZDCm_EM_EnergySOIp1", ZDCm_EM_EnergySOIp1, "ZDCm_EM_EnergySOIp1[ZDCm_EM_n]/F");
-     t1->Branch("ZDCm_EM_RatioSOIp1", ZDCm_EM_RatioSOIp1, "ZDCm_EM_RatioSOIp1[ZDCm_EM_n]/F");
-    
-     t1->Branch("ZDCm_HAD_n", &ZDCm_HAD_n );
-     t1->Branch("ZDCm_HAD_Channel", ZDCm_HAD_Channel, "ZDCm_HAD_Channel[ZDCm_HAD_n]/I");
-     t1->Branch("ZDCm_HAD_Energy", ZDCm_HAD_Energy, "ZDCm_HAD_Energy[ZDCm_HAD_n]/F");
-     t1->Branch("ZDCm_HAD_Time", ZDCm_HAD_Time, "ZDCm_HAD_Time[ZDCm_HAD_n]/F");
-     t1->Branch("ZDCm_HAD_TDCtime", ZDCm_HAD_TDCtime, "ZDCm_HAD_TDCtime[ZDCm_HAD_n]/F");
-     t1->Branch("ZDCm_HAD_ChargeWeightedTime", ZDCm_HAD_ChargeWeightedTime, "ZDCm_HAD_ChargeWeightedTime[ZDCm_HAD_n]/F");
-     t1->Branch("ZDCm_HAD_EnergySOIp1", ZDCm_HAD_EnergySOIp1, "ZDCm_HAD_EnergySOIp1[ZDCm_HAD_n]/F");
-     t1->Branch("ZDCm_HAD_RatioSOIp1", ZDCm_HAD_RatioSOIp1, "ZDCm_HAD_RatioSOIp1[ZDCm_HAD_n]/F");
- 
-     if(!skipRPD_){
-     t1->Branch("ZDCm_RPD_n", &ZDCm_RPD_n );
-     t1->Branch("ZDCm_RPD_Channel", ZDCm_RPD_Channel, "ZDCm_RPD_Channel[ZDCm_RPD_n]/I");
-     t1->Branch("ZDCm_RPD_Energy", ZDCm_RPD_Energy, "ZDCm_RPD_Energy[ZDCm_RPD_n]/F");
-     t1->Branch("ZDCm_RPD_Time", ZDCm_RPD_Time, "ZDCm_RPD_Time[ZDCm_RPD_n]/F");
-     t1->Branch("ZDCm_RPD_TDCtime", ZDCm_RPD_TDCtime, "ZDCm_RPD_TDCtime[ZDCm_RPD_n]/F");
-     t1->Branch("ZDCm_RPD_ChargeWeightedTime", ZDCm_RPD_ChargeWeightedTime, "ZDCm_RPD_ChargeWeightedTime[ZDCm_RPD_n]/F");
-     t1->Branch("ZDCm_RPD_EnergySOIp1", ZDCm_RPD_EnergySOIp1, "ZDCm_RPD_EnergySOIp1[ZDCm_RPD_n]/F");
-     t1->Branch("ZDCm_RPD_RatioSOIp1", ZDCm_RPD_RatioSOIp1, "ZDCm_RPD_RatioSOIp1[ZDCm_RPD_n]/F");
-     }
   }
   
   if(doZdcDigis_){
@@ -535,7 +295,6 @@ void ZDCRecHitAnalyzer::beginJob() {
     t1->Branch("zdcdigi_zside", zdcDigi.zside, "zdcdigi_zside[zdcdigi_n]/I");
     t1->Branch("zdcdigi_section", zdcDigi.section, "zdcdigi_section[zdcdigi_n]/I");
     t1->Branch("zdcdigi_channel", zdcDigi.channel, "zdcdigi_channel[zdcdigi_n]/I");
-
     for (int i = 0; i < 6; i++) {
       TString adcTsSt("zdcdigi_adcTs"), chargefCTsSt("zdcdigi_chargefCTs"), tdcTsSt("zdcdigi_tdcTs");
       adcTsSt += i;
@@ -547,6 +306,7 @@ void ZDCRecHitAnalyzer::beginJob() {
       t1->Branch(tdcTsSt, zdcDigi.tdc[i], tdcTsSt + "[zdcdigi_n]/I");
     }
   }
+  
 }
 
 // ------------ method called once each job just after ending the event loop  ------------

@@ -55,12 +55,12 @@
 
 struct MyZDCDigi {
   int n;
-  float chargefC[50][6];
-  int adc[50][6];
-  int tdc[50][6];
-  int zside[6];
-  int section[6];
-  int channel[6];
+  float chargefC[10][50];
+  int adc[10][50];
+  int tdc[10][50];
+  int zside[50];
+  int section[50];
+  int channel[50];
 };
 
 using reco::TrackCollection;
@@ -80,9 +80,9 @@ private:
   void endJob() override;
 
   // ----------member data ---------------------------
-   const edm::EDGetTokenT<QIE10DigiCollection> ZDCDigiToken_;  //used to select what tracks to read from configuration file
-   const edm::EDGetTokenT<edm::SortedCollection<ZDCRecHit>> ZDCRecHitToken_;  //used to select what tracks to read from configuration file
-   const edm::EDGetTokenT<edm::SortedCollection<ZDCRecHit>> AuxZDCRecHitToken_;  //used to select what tracks to read from configuration file
+   const edm::EDGetTokenT<QIE10DigiCollection> ZDCDigiToken_;  
+   const edm::EDGetTokenT<edm::SortedCollection<ZDCRecHit>> ZDCRecHitToken_;
+   const edm::EDGetTokenT<edm::SortedCollection<ZDCRecHit>> AuxZDCRecHitToken_; 
    edm::ESGetToken<HcalDbService, HcalDbRecord> hcalDatabaseToken_;
   bool doZdcRecHits_;
   bool doZdcDigis_;
@@ -261,9 +261,9 @@ void ZDCRecHitAnalyzerHC::analyze(const edm::Event& iEvent, const edm::EventSetu
 
         for (int ts = 0; ts < digi.samples(); ts++) {
 
-          zdcDigi.chargefC[nhits][ts] = caldigi[ts];
-          zdcDigi.adc[nhits][ts] = digi[ts].adc();
-          zdcDigi.tdc[nhits][ts] = digi[ts].le_tdc();
+          zdcDigi.chargefC[ts][nhits] = caldigi[ts];
+          zdcDigi.adc[ts][nhits] = digi[ts].adc();
+          zdcDigi.tdc[ts][nhits] = digi[ts].le_tdc();
         }
       nhits++;
     }  // end loop zdc digis
@@ -299,9 +299,9 @@ void ZDCRecHitAnalyzerHC::analyze(const edm::Event& iEvent, const edm::EventSetu
 
            for (int ts = 0; ts < digi.samples(); ts++) {
 
-             zdcDigi.chargefC[nhits][ts] = HardCodeZDC.charge(digi[ts].adc(),digi[ts].capid());
-             zdcDigi.adc[nhits][ts] = digi[ts].adc();
-             zdcDigi.tdc[nhits][ts] = digi[ts].le_tdc();
+             zdcDigi.chargefC[ts][nhits] = HardCodeZDC.charge(digi[ts].adc(),digi[ts].capid());
+             zdcDigi.adc[ts][nhits] = digi[ts].adc();
+             zdcDigi.tdc[ts][nhits] = digi[ts].le_tdc();
            }
          }
          if(doHardcodedRecHitsRPD_){
@@ -395,9 +395,16 @@ void ZDCRecHitAnalyzerHC::beginJob() {
     t1->Branch("zdcdigi_zside", zdcDigi.zside, "zdcdigi_zside[zdcdigi_n]/I");
     t1->Branch("zdcdigi_section", zdcDigi.section, "zdcdigi_section[zdcdigi_n]/I");
     t1->Branch("zdcdigi_channel", zdcDigi.channel, "zdcdigi_channel[zdcdigi_n]/I");
-    t1->Branch("zdcdigi_adc", zdcDigi.adc, "zdcdigi_adc[zdcdigi_n][6]/I");
-    t1->Branch("zdcdigi_chargefC", zdcDigi.chargefC, "zdcdigi_chargefC[zdcdigi_n][6]/I");
-    t1->Branch("zdcdigi_tdc", zdcDigi.tdc, "zdcdigi_tdc[zdcdigi_n][6]/I");
+    for (int i = 0; i < 6; i++) {
+      TString adcTsSt("zdcdigi_adcTs"), chargefCTsSt("zdcdigi_chargefCTs"), tdcTsSt("zdcdigi_tdcTs");
+      adcTsSt += i;
+      chargefCTsSt += i;
+      tdcTsSt += i;
+
+      t1->Branch(adcTsSt, zdcDigi.adc[i], adcTsSt + "[zdcdigi_n]/I");
+      t1->Branch(chargefCTsSt, zdcDigi.chargefC[i], chargefCTsSt + "[zdcdigi_n]/F");
+      t1->Branch(tdcTsSt, zdcDigi.tdc[i], tdcTsSt + "[zdcdigi_n]/I");
+    }
   }
   
   
