@@ -1,22 +1,23 @@
 import ROOT
 
-import CMS_lumi, tdrstyle
+ROOT.gROOT.SetBatch(True) 
 
 RunEra = "OO 2025" 
 RunNumber = "Run392713"
 
 RunEnergy = "5.36 TeV"
 
-# InputFileName = "/eos/user/m/mnickel/HIForward0_2024_R388750.root"
-InputFileName = "/afs/cern.ch/user/m/mnickel/private/ZDC_Trig/CMSSW_14_1_3/src/2025_Oxygen/Oxygen_Test.root"
+#input file name: this will need to be changed to the input file from the global run 
+InputFileName = "/eos/user/m/mnickel/HIForward0_2024_R388750.root"#"HIForward0_2024_R388750.root"
 
-fileBegin = "OxygenTest_ZDC_TDC_" # Beginning of plot output, Full output will be <fileBegin>+<ZDC Channel>.png
+fileBegin = "OxygenTest_TDC" # Beginning of plot output, Full output will be <fileBegin>+<ZDC Channel>.png
 
 nbin_minus, min_minus, max_minus = 150,0,150 # Binning for ZDC Minus
 nbin_plus, min_plus, max_plus = 150,0,150 # Binning for ZDC Plus
 
 doAutoFit = True  # Use the mean and width from histogram stats to initialize gaussian fit
 ConsiderAllTimeSlices = False # adds all TDC values less than 50 to the Timing Histogram, Otherwise only TDC info from TS with highest charge or preceding TS in case of overflow is considered.
+doPlotting = False
 
 
 Min_Charge = 1000 # minimum charge to consider a TDC value
@@ -42,36 +43,6 @@ ZdcFitRange = {
   "ZDCp_HAD4": [45, 60],  
 }
 
-#set the tdr style
-tdrstyle.setTDRStyle()
-
-def SetCMSLumiConds():
-    #change the CMS_lumi variables (see CMS_lumi.py)
-    CMS_lumi.lumi_7TeV = "4.8 fb^{-1}"
-    CMS_lumi.lumi_8TeV = "18.3 fb^{-1}"
-    CMS_lumi.writeExtraText = 1
-    CMS_lumi.extraText = "Private Work"
-    # CMS_lumi.lumi_sqrtS = "13 TeV" # used with iPeriod = 0, e.g. for simulation-only plots (default is an empty string)
-
-    CMS_lumi.lumi_5TeV  = "PbPb - 1.70 nb^{-1} ";
-    
-    HI_string = "{} - {}  #sqrt{{s_{{NN}}}} = {}".format(RunEra, RunNumber, RunEnergy); 
-    
-    CMS_lumi.lumi_sqrtS = HI_string    
-    CMS_lumi.relPosX = 0.12
-
-def DoCMSLumiCanvas(canvas):
-    SetCMSLumiConds()
-    
-    CMS_lumi.CMS_lumi(canvas, 0, 0)
-
-    canvas.cd()
-    canvas.Update()
-    canvas.RedrawAxis()
-    
-    return canvas
-
-
 # ZDC Rechit and Digi trees from zdcanalyzer
 ZDCRecHit_treeName = "zdcanalyzer/zdcrechit"
 ZDCDigi_TreeName = "zdcanalyzer/zdcdigi"
@@ -82,9 +53,9 @@ chain.Add(  InputFileName)
 # Add a friend tree
 chain.AddFriend("zdcdigi = {}".format(ZDCDigi_TreeName), InputFileName) 
 
-# chain.AddFriend("hlttree = hltanalysis/HltTree", InputFileName) 
-
 dataframe = ROOT.RDataFrame(chain)
+
+
 
 tdcFuncBegin = "chargefCTs0, tdcTs0, chargefCTs1, tdcTs1, chargefCTs2, tdcTs2, chargefCTs3, tdcTs3, chargefCTs4, tdcTs4, chargefCTs5, tdcTs5"
 
@@ -106,7 +77,6 @@ ZdcChargeDict = {
   "ZDCp_EM4": ["{}({}, 12,{})".format(FuncType, tdcFuncBegin, Min_Charge), nbin_plus, min_plus, max_plus], 
   "ZDCp_EM5": ["{}({}, 13,{})".format(FuncType, tdcFuncBegin, Min_Charge), nbin_plus, min_plus, max_plus], 
   "ZDCp_HAD1": ["{}({}, 14,{})".format(FuncType, tdcFuncBegin, Min_Charge),  nbin_plus, min_plus, max_plus], 
-  "ZDCp_HAD2": ["{}({}, 15,{})".format(FuncType, tdcFuncBegin, Min_Charge),  nbin_plus, min_plus, max_plus], 
   "ZDCp_HAD2": ["{}({}, 15,{})".format(FuncType, tdcFuncBegin, Min_Charge),  nbin_plus, min_plus, max_plus], 
   "ZDCp_HAD3": ["{}({}, 16,{})".format(FuncType, tdcFuncBegin, Min_Charge),  nbin_plus, min_plus, max_plus], 
   "ZDCp_HAD4": ["{}({}, 17,{})".format(FuncType, tdcFuncBegin, Min_Charge),  nbin_plus, min_plus, max_plus], 
@@ -160,8 +130,6 @@ ZdcChargeDict_fC = {
   "ZDCp_HAD4": ["{}[17]".format(fC_Variable),   nbin_plus, min_plus, max_plus], 
 }
 
-
-
 # Select events for the analysis
 ROOT.gInterpreter.Declare(
     """
@@ -206,44 +174,6 @@ const RVecF &Charge3, const RVecI &Tdc3, const RVecF &Charge4, const RVecI &Tdc4
 }
 """
 )
-
-
-
-
-# Select events for the analysis
-ROOT.gInterpreter.Declare(
-    """
-using ROOT::RVecF;
-using ROOT::RVecI;
-float GetMaxCharge(const RVecF &Charge0, const RVecI &Tdc0, const RVecF &Charge1, const RVecI &Tdc1, const RVecF &Charge2, const RVecI &Tdc2,
-const RVecF &Charge3, const RVecI &Tdc3, const RVecF &Charge4, const RVecI &Tdc4, const RVecF &Charge5, const RVecI &Tdc5, int index)
-{ 
-
-  float max_charge =0;
-  if(Charge0[index] > max_charge) max_charge = Charge0[index];
-  if(Charge1[index] > max_charge) max_charge = Charge1[index];
-  if(Charge2[index] > max_charge) max_charge = Charge2[index];
-  if(Charge3[index] > max_charge) max_charge = Charge3[index];
-  if(Charge4[index] > max_charge) max_charge = Charge4[index];
-  if(Charge5[index] > max_charge) max_charge = Charge5[index];
-  return( max_charge);
-}
-"""
-)
-
-# Select events for the analysis
-ROOT.gInterpreter.Declare(
-    """
-using ROOT::RVecF;
-using ROOT::RVecI;
-bool GetCharge(const RVecF &charge, int index)
-{
-    return charge[index];
-}
-"""
-)
- 
-
 
 textsize = .03
 
@@ -296,51 +226,52 @@ for x in ZdcChargeDict:
         PedCharge.setRange("signal",tmp_mean - 5.0,tmp_mean + 5.0);        
 
     data = ROOT.RooDataHist("PedCharge", "PedCharge", [PedCharge], Import=Timing_Hist.GetValue())
-    model.fitTo(data,ROOT.RooFit.Range("signal"), PrintLevel = -1,PrintEvalErrors = -1); 
-    
-    xframe = PedCharge.frame(Title="")
-    data.plotOn(xframe)
-
-    model.plotOn(xframe, LineStyle="-", LineColor=1);     
+    #model.fitTo(data,ROOT.RooFit.Range("signal"), PrintLevel = -1,PrintEvalErrors = -1)
+    model.fitTo(data, ROOT.RooFit.Range("signal"), ROOT.RooFit.PrintLevel(-1), ROOT.RooFit.PrintEvalErrors(-1), ROOT.RooFit.NumCPU(4))
 
 
-    c = ROOT.TCanvas("rf201_composite", "rf201_composite", 1600, 1200)
-    ROOT.gPad.SetLeftMargin(0.15)
-    # ROOT.gPad.SetRightMargin(0.05)
-    # ROOT.gPad.SetTopMargin(0.12)
-    # ROOT.gPad.SetBottomMargin(0.08)
-    xframe.GetYaxis().SetTitleOffset(0.0)
-    # xframe.SetMinimum(1);
-    
-    xframe.GetXaxis().SetTitle("Time (ns): {}".format(x))
-    xframe.GetYaxis().SetTitle("Number of Events")
-    xframe.GetYaxis().SetTitleSize(0.04)
-    xframe.GetXaxis().SetTitleSize(0.04)
-    xframe.GetYaxis().SetTitleOffset(1.5)
-    xframe.GetXaxis().SetTitleOffset(1.5)
-    xframe.GetYaxis().SetMaxDigits(3)
-    xframe.GetXaxis().SetMaxDigits(3)
-    ROOT.TGaxis.SetExponentOffset(0.01, -0.055, "y")
+    if doPlotting:
+        xframe = PedCharge.frame(Title="")
+        data.plotOn(xframe)
 
-    xframe.Draw()
-    label = ROOT.TLatex(); label.SetNDC(True); label.SetTextColor(1); label.SetTextSize(textsize);
-    label.DrawLatex(.55, .9, "#splitline{{Gaussain Fit mean = {:0.2f} #pm {:0.2f} }}{{ width = {:0.2f} #pm {:0.2f} }}".format(mean.getValV(),mean.getError(),sigma.getValV(),sigma.getError()))
+        model.plotOn(xframe, LineStyle="-", LineColor=1);     
 
     
-    c.SetLogy(0)
+        c = ROOT.TCanvas("rf201_composite_{}".format(x), "rf201_composite_{}".format(x), 1600, 1200)
+        ROOT.gPad.SetLeftMargin(0.15)
+        xframe.GetYaxis().SetTitleOffset(0.0)
+        
+        xframe.GetXaxis().SetTitle("Time (ns): {}".format(x))
+        xframe.GetYaxis().SetTitle("Number of Events")
+        xframe.GetYaxis().SetTitleSize(0.04)
+        xframe.GetXaxis().SetTitleSize(0.04)
+        xframe.GetYaxis().SetTitleOffset(1.5)
+        xframe.GetXaxis().SetTitleOffset(1.5)
+        xframe.GetYaxis().SetMaxDigits(3)
+        xframe.GetXaxis().SetMaxDigits(3)
+        ROOT.TGaxis.SetExponentOffset(0.01, -0.055, "y")
+        
+        xframe.Draw()
+        label = ROOT.TLatex(); label.SetNDC(True); label.SetTextColor(1); label.SetTextSize(textsize);
+        label.DrawLatex(.55, .9, "#splitline{{Gaussain Fit mean = {:0.2f} #pm {:0.2f} }}{{ width = {:0.2f} #pm {:0.2f} }}".format(mean.getValV(),mean.getError(),sigma.getValV(),sigma.getError()))
+
+    
+        c.SetLogy(0)
+        c.SaveAs("{}_{}.png".format(fileBegin, x))
+
+    # now save the results
     means.append(mean.getValV())
     widths.append(sigma.getValV())
     
     ZDC_TimeStats[x] = [mean.getValV(),sigma.getValV(),mean.getError(),sigma.getError()]
-    
-    
-    # Need to comment out DoCMSLumiCanvas if you are not using CMS_lumi.py and tdrstyle.py
-    c = DoCMSLumiCanvas(c)
-    
-    c.SaveAs("{}.png".format(fileBegin, x)) 
 
     
-    
-print("Channel, Mean, Mean Error, Sigma, Sigma Error")
+# Print the results
+print("| Channel | Mean | Mean Error | Sigma | Sigma Error |")
+print("|---------|------|------------|--------|--------------|")
 for x in ZDC_TimeStats:
-    print("{}, {}, {}, {}, {}".format(x, ZDC_TimeStats[x][0],ZDC_TimeStats[x][2],ZDC_TimeStats[x][1],ZDC_TimeStats[x][3]))
+    mean = round(ZDC_TimeStats[x][0], 3)
+    sigma = round(ZDC_TimeStats[x][1], 3)
+    mean_err = round(ZDC_TimeStats[x][2], 3)
+    sigma_err = round(ZDC_TimeStats[x][3], 3)
+    print(f"| {x} | {mean} | {mean_err} | {sigma} | {sigma_err} |")
