@@ -1,14 +1,12 @@
 import ROOT
 
-import CMS_lumi, tdrstyle
-
 RunEra = "OO 2025" 
 RunNumber = "Run393544"
 
 RunEnergy = "5.36 TeV"
 
 # InputFileName = "/eos/user/m/mnickel/HIForward_2024_R388750_L1Info_OxygenTest.root"
-InputFileName = "Oxygen_393544.root"
+InputFileName = "/afs/cern.ch/user/h/hbossi/public/Oxygen/Oxygen_393546.root"
 # InputFileName = "/afs/cern.ch/user/m/mnickel/private/ZDC_Trig/CMSSW_14_1_3/src/2025_Oxygen/Oxygen_Test.root"
 
 fileBegin = "OxygenTest_ZDC_TDC_" # Beginning of plot output, Full output will be <fileBegin>+<ZDC Channel>.png
@@ -18,7 +16,7 @@ nbin_plus, min_plus, max_plus = 150,0,150 # Binning for ZDC Plus
 
 doAutoFit = False  # Use the mean and width from histogram stats to initialize gaussian fit
 ConsiderAllTimeSlices = False # adds all TDC values less than 50 to the Timing Histogram, Otherwise only TDC info from TS with highest charge or preceding TS in case of overflow is considered.
-
+doPlotting = False
 
 Min_Charge = 1000 # minimum charge to consider a TDC value
 
@@ -36,34 +34,6 @@ ZdcFitRange = {
 }
 
 
-#set the tdr style
-tdrstyle.setTDRStyle()
-
-def SetCMSLumiConds():
-    #change the CMS_lumi variables (see CMS_lumi.py)
-    CMS_lumi.lumi_7TeV = "4.8 fb^{-1}"
-    CMS_lumi.lumi_8TeV = "18.3 fb^{-1}"
-    CMS_lumi.writeExtraText = 1
-    CMS_lumi.extraText = "Private Work"
-    # CMS_lumi.lumi_sqrtS = "13 TeV" # used with iPeriod = 0, e.g. for simulation-only plots (default is an empty string)
-
-    CMS_lumi.lumi_5TeV  = "PbPb - 1.70 nb^{-1} ";
-    
-    HI_string = "{} - {}  #sqrt{{s_{{NN}}}} = {}".format(RunEra, RunNumber, RunEnergy); 
-    
-    CMS_lumi.lumi_sqrtS = HI_string    
-    CMS_lumi.relPosX = 0.12
-
-def DoCMSLumiCanvas(canvas):
-    SetCMSLumiConds()
-    
-    CMS_lumi.CMS_lumi(canvas, 0, 0)
-
-    canvas.cd()
-    canvas.Update()
-    canvas.RedrawAxis()
-    
-    return canvas
 
 
 # ZDC Rechit and Digi trees from zdcanalyzer
@@ -231,50 +201,51 @@ for x in ZdcChargeDict:
 
     data = ROOT.RooDataHist("PedCharge", "PedCharge", [PedCharge], Import=Timing_Hist.GetValue())
     model.fitTo(data,ROOT.RooFit.Range("signal"), PrintLevel = -1,PrintEvalErrors = -1); 
+
+    if doPlotting:
+        xframe = PedCharge.frame(Title="")
+        data.plotOn(xframe)
+        
+        model.plotOn(xframe, LineStyle="-", LineColor=1);     
+        
+        
+        c = ROOT.TCanvas("rf201_composite", "rf201_composite", 1600, 1200)
+        ROOT.gPad.SetLeftMargin(0.15)
+        # ROOT.gPad.SetRightMargin(0.05)
+        # ROOT.gPad.SetTopMargin(0.12)
+        # ROOT.gPad.SetBottomMargin(0.08)
+        xframe.GetYaxis().SetTitleOffset(0.0)
+        # xframe.SetMinimum(1);
+        
+        xframe.GetXaxis().SetTitle("Time (ns): {}".format(x))
+        xframe.GetYaxis().SetTitle("Number of Events")
+        xframe.GetYaxis().SetTitleSize(0.04)
+        xframe.GetXaxis().SetTitleSize(0.04)
+        xframe.GetYaxis().SetTitleOffset(1.5)
+        xframe.GetXaxis().SetTitleOffset(1.5)
+        xframe.GetYaxis().SetMaxDigits(3)
+        xframe.GetXaxis().SetMaxDigits(3)
+        ROOT.TGaxis.SetExponentOffset(0.01, -0.055, "y")
+        
+        xframe.Draw()
+        label = ROOT.TLatex(); label.SetNDC(True); label.SetTextColor(1); label.SetTextSize(textsize);
+        label.DrawLatex(.55, .9, "#splitline{{Gaussain Fit mean = {:0.2f} #pm {:0.2f} }}{{ width = {:0.2f} #pm {:0.2f} }}".format(mean.getValV(),mean.getError(),sigma.getValV(),sigma.getError()))
+
     
-    xframe = PedCharge.frame(Title="")
-    data.plotOn(xframe)
+        c.SetLogy(0)
+        c.SaveAs("{}_{}.png".format(fileBegin, x))
 
-    model.plotOn(xframe, LineStyle="-", LineColor=1);     
-
-
-    c = ROOT.TCanvas("rf201_composite", "rf201_composite", 1600, 1200)
-    ROOT.gPad.SetLeftMargin(0.15)
-    # ROOT.gPad.SetRightMargin(0.05)
-    # ROOT.gPad.SetTopMargin(0.12)
-    # ROOT.gPad.SetBottomMargin(0.08)
-    xframe.GetYaxis().SetTitleOffset(0.0)
-    # xframe.SetMinimum(1);
-    
-    xframe.GetXaxis().SetTitle("Time (ns): {}".format(x))
-    xframe.GetYaxis().SetTitle("Number of Events")
-    xframe.GetYaxis().SetTitleSize(0.04)
-    xframe.GetXaxis().SetTitleSize(0.04)
-    xframe.GetYaxis().SetTitleOffset(1.5)
-    xframe.GetXaxis().SetTitleOffset(1.5)
-    xframe.GetYaxis().SetMaxDigits(3)
-    xframe.GetXaxis().SetMaxDigits(3)
-    ROOT.TGaxis.SetExponentOffset(0.01, -0.055, "y")
-
-    xframe.Draw()
-    label = ROOT.TLatex(); label.SetNDC(True); label.SetTextColor(1); label.SetTextSize(textsize);
-    label.DrawLatex(.55, .9, "#splitline{{Gaussain Fit mean = {:0.2f} #pm {:0.2f} }}{{ width = {:0.2f} #pm {:0.2f} }}".format(mean.getValV(),mean.getError(),sigma.getValV(),sigma.getError()))
-
-    
-    c.SetLogy(0)
     means.append(mean.getValV())
     widths.append(sigma.getValV())
     
     ZDC_TimeStats[x] = [mean.getValV(),sigma.getValV(),mean.getError(),sigma.getError()]
     
     
-    # Need to comment out DoCMSLumiCanvas if you are not using CMS_lumi.py and tdrstyle.py
-    c = DoCMSLumiCanvas(c)
-    
-    c.SaveAs("{}_{}.png".format(fileBegin, x)) 
 
     
     
-print("Channel, Mean, Mean Error, Sigma, Sigma Error")
+print("| Channel | Mean | Mean Error | Sigma | Sigma Error |")
+print("|---------|------|------------|-------|-------------|")
 for x in ZDC_TimeStats:
-    print("{}, {}, {}, {}, {}".format(x, ZDC_TimeStats[x][0],ZDC_TimeStats[x][2],ZDC_TimeStats[x][1],ZDC_TimeStats[x][3]))
+    print(f"| {x} | {ZDC_TimeStats[x][0]:.2f} | {ZDC_TimeStats[x][2]:.2f} | {ZDC_TimeStats[x][1]:.2f} | {ZDC_TimeStats[x][3]:.2f} |")
+
