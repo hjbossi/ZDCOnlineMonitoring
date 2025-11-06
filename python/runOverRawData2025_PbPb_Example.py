@@ -23,7 +23,7 @@ process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
 from Configuration.AlCa.GlobalTag import GlobalTag
 # use the prompt queue for now, will need to update when the full GT becomes available
-process.GlobalTag = GlobalTag(process.GlobalTag, '151X_dataRun3_Prompt_Queue', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, '151X_dataRun3_Prompt_HCALZDC_forT0Replay', '')
 
 
 # needed to supress error from cmssw 14
@@ -43,44 +43,11 @@ process.maxEvents = cms.untracked.PSet(
 # )
 
 # input source if a streamer file
-filedir = '/eos/cms/store/t0streamer/Data/PhysicsCommissioning/000/398/000'
-print(filedir)
-infile    = cms.untracked.vstring()
-for f in reversed(os.listdir(filedir)):
-   if f[-4:] == '.dat' :
-       infile.append('file:'+filedir+'/'+f)
-print(infile)
-
-
 
 process.source = cms.Source("NewEventStreamFileReader",
-                           fileNames = infile,
+                           fileNames =  cms.untracked.vstring('file:/eos/cms/store/group/phys_heavyions/hbossi/ZDC2025/Commissioning/run398000_ls0028_streamPhysicsCommissioning_StorageManager.dat'),
 )
 
-from CondCore.CondDB.CondDB_cfi import *
-process.es_pool = cms.ESSource("PoolDBESSource",
-    # timetype = cms.string('runnumber'),
-    toGet = cms.VPSet(
-        cms.PSet(
-            record = cms.string("HcalElectronicsMapRcd"),
-            tag = cms.string("HcalElectronicsMap_2021_v2.0_data")
-        )
-    ),
-    connect = cms.string('frontier://FrontierProd/CMS_CONDITIONS')
-        # authenticationMethod = cms.untracked.uint32(1)
-    )
-
-process.es_prefer = cms.ESPrefer('HcalTextCalibrations', 'es_ascii')
-process.es_ascii = cms.ESSource(
-    'HcalTextCalibrations',
-    input = cms.VPSet(
-        cms.PSet(
-            object = cms.string('ElectronicsMap'),
-            file = cms.FileInPath("emap_2025_full.txt")
-
-             )
-        )
-    )
 
 process.options = cms.untracked.PSet(
     IgnoreCompletely = cms.untracked.vstring(),
