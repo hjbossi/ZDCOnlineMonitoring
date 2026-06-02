@@ -115,15 +115,16 @@ map<int, bxSchemeBits> getBxScheme(string schemeCSV)
 // input: folder of l1ntuples to read from - must contain the branches specified above
 // verbose: whether or not to print out the full output (error messgaes will always be printed)
 
+
+//Lynn: This code loops through lumisections of runs. 
+// 1. Put the run folders in a txt file like ZDCEmuExample.txt
+// 2. change the key and output folder and ls as desired
+// 3. root plotZDCEmuLoop.C to run
 int plotZDCEmuLoop(
-                    vector<string> lsNumSetVector = {"0069","0070",
-                    "0071","0072","0073","0074","0075","0076","0077","0078","0079",
-                    "0080","0081","0082","0083","0084","0085","0086","0087","0088","0089","0090",
-                    "0091","0092","0093","0094","0095","0096","0097","0098","0099","0100","0101",
-                    "0102","0103","0104","0105","0106","0107","0108","0109","0110","0111","0112"
-                    },
-                  string intxtfilename = "/afs/cern.ch/user/x/xirong/ZDCOnlineMonitoring/plotting/Forward_394.txt",
-                  string key = "PhysicsHIForward") {
+                  vector<string> lsNumSetVector = {"0100"},
+                  string intxtfilename = "ZDCEmuExample.txt",
+                  string key = "PhysicsHIPhysicsRawPrime",
+                  string outFolder = "output/"){
 
     int fitxmin1n = 2000;
     int fitymin1n = 4000;
@@ -331,7 +332,7 @@ int plotZDCEmuLoop(
 
     string nBunch = fillToBunches[fill];
     if(nBunch.size() == 0){cout << "NBunch for fill=" << fill << " not set. return 1" << endl; return 1;}
-    string outDirPlot = "/eos/cms/store/group/phys_heavyions/xirong/ZDCNeutronPeakPlots/Run" + runNum + "ls" + lsNumStr + key + "/";
+    string outDirPlot = outFolder + "Run" + runNum + "ls" + lsNumStr + key + "/";
     if (gSystem->AccessPathName(outDirPlot.c_str())) {
         gSystem->mkdir(outDirPlot.c_str(), kTRUE);
     }
